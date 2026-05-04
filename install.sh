@@ -169,8 +169,19 @@ SYNC_SCRIPT="$REPO_DIR/.claude/scripts/sync-skills.sh"
 if [ -f "$SYNC_SCRIPT" ]; then
   # Invoke via `bash` so we don't depend on the exec bit being set yet —
   # the chmod step runs later in this script.
-  bash "$SYNC_SCRIPT" | grep -E '^(SYNCED|PRUNED|FAILED)=' | sed 's/^/  /' || true
-  echo "  ✅ Skill sync complete (see lines above for details)."
+  SYNC_LOG=$(mktemp)
+  if bash "$SYNC_SCRIPT" > "$SYNC_LOG" 2>&1; then
+    grep -E '^(SYNCED|PRUNED|FAILED)=' "$SYNC_LOG" | sed 's/^/  /' || true
+    echo "  ✅ Skill sync complete."
+  else
+    SYNC_EXIT=$?
+    grep -E '^(SYNCED|PRUNED|FAILED)=' "$SYNC_LOG" | sed 's/^/  /' || true
+    echo "  ❌ Skill sync failed (exit $SYNC_EXIT). Full log:"
+    sed 's/^/     /' "$SYNC_LOG"
+    rm -f "$SYNC_LOG"
+    exit 1
+  fi
+  rm -f "$SYNC_LOG"
 else
   echo "  ⚠️  Sync script not found at $SYNC_SCRIPT"
   echo "       Check your clone is complete, then re-run: bash install.sh"

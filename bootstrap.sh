@@ -4,7 +4,7 @@
 #
 # Flow: prereq check → clone (or update) → install.sh → exec claude "/setup-demo-scout"
 
-set -e
+set -eo pipefail
 
 REPO_URL="https://github.com/seb-schi/sf-demo-scout"
 PROJECTS_DIR="$HOME/claude-projects"

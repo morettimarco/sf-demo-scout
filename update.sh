@@ -3,7 +3,7 @@
 # Preserves org data (audits, specs, change logs) and org config.
 # Safe to run from inside or outside the project directory.
 
-set -e
+set -eo pipefail
 
 REPO_NAME="sf-demo-scout"
 PROJECTS_DIR="$HOME/claude-projects"
@@ -87,7 +87,7 @@ on_error() {
   echo ""
   echo "To recover manually:"
   echo ""
-  echo "   git clone $REPO_URL $REPO_DIR"
+  echo "   rm -rf $REPO_DIR && git clone $REPO_URL $REPO_DIR"
   if [ -d "$BACKUP_DIR/orgs" ]; then
     echo "   cp -R $BACKUP_DIR/orgs $REPO_DIR/orgs"
   fi
