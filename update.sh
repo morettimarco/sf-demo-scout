@@ -75,6 +75,32 @@ else
   echo "   ℹ️  No .sf/config.json found"
 fi
 
+# --- Failure safety net: if anything below this point fails, tell the SE where their data is ---
+on_error() {
+  echo ""
+  echo "================================"
+  echo "⚠️  Update failed mid-way."
+  echo "================================"
+  echo ""
+  echo "Your org data is SAFE at:"
+  echo "   $BACKUP_DIR/orgs/"
+  echo ""
+  echo "To recover manually:"
+  echo ""
+  echo "   git clone $REPO_URL $REPO_DIR"
+  if [ -d "$BACKUP_DIR/orgs" ]; then
+    echo "   cp -R $BACKUP_DIR/orgs $REPO_DIR/orgs"
+  fi
+  if [ -f "$BACKUP_DIR/.sf/config.json" ]; then
+    echo "   mkdir -p $REPO_DIR/.sf && cp $BACKUP_DIR/.sf/config.json $REPO_DIR/.sf/config.json"
+  fi
+  echo "   cd $REPO_DIR && bash install.sh"
+  echo ""
+  echo "The backup at $BACKUP_DIR will NOT be auto-deleted — it stays until you manually remove it or re-run update.sh successfully."
+  echo ""
+}
+trap on_error ERR
+
 # --- 3. Delete ---
 echo ""
 echo "🗑️  Removing old installation..."
