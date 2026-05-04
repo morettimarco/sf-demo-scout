@@ -1,25 +1,14 @@
 #!/bin/bash
 # SF Demo Scout — Bootstrap
-# One-liner installer: curl -fsSL <raw-url>/bootstrap.sh | bash
+# One-liner installer: bash -c "$(curl -fsSL <raw-url>/bootstrap.sh)"
 #
 # Flow: prereq check → clone (or update) → install.sh → exec claude "/setup-demo-scout"
-# Reattaches /dev/tty so downstream prompts work under `curl | bash`.
 
 set -e
 
 REPO_URL="https://github.com/seb-schi/sf-demo-scout"
 PROJECTS_DIR="$HOME/claude-projects"
 REPO_DIR="$PROJECTS_DIR/sf-demo-scout"
-
-# --- Reattach /dev/tty so interactive prompts work under `curl | bash` ---
-if [ ! -t 0 ]; then
-  if [ -e /dev/tty ]; then
-    exec < /dev/tty
-  else
-    echo "❌ No TTY available. Run this from an interactive terminal."
-    exit 1
-  fi
-fi
 
 echo ""
 echo "🤖 SF Demo Scout — Bootstrap"

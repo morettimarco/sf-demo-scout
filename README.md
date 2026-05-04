@@ -19,7 +19,7 @@ SF Demo Scout is a Claude Code pipeline that *spars* with you about customer sce
 ## Install (One Time, We Promise)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh)"
 ```
 
 One command. Go grab a coffee. ☕ Bootstrap clones the repo to `~/claude-projects/sf-demo-scout`, runs the full installer (Homebrew, Node.js, Python, Salesforce CLI, Slack MCP registration, 16 community skills, CLI self-updates), and drops you straight into a Claude Code session running `/setup-demo-scout`. Idempotent — safe to re-run. If the repo already exists, bootstrap routes to `update.sh` instead.
