@@ -36,7 +36,7 @@ bash ~/claude-projects/sf-demo-scout/update.sh
 
 Or just re-run the bootstrap one-liner — it routes to `update.sh` automatically when the repo already exists. Scout nukes the install, re-clones fresh, restores your org data (audits, specs, change logs), and lands you back inside a Claude Code session running `/setup-demo-scout`. Clean slate. Zero drift. ~30 seconds.
 
-> 💡 Running from VS Code? `update.sh` pops open Terminal.app for you. Close VS Code, let it cook, reopen after.
+> 💡 Prefer VS Code? `update.sh` pops open Terminal.app for you if you run it from VS Code's integrated terminal. Close VS Code, let it cook, reopen after.
 
 ---
 
