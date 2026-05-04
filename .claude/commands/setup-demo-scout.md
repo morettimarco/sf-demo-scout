@@ -34,11 +34,9 @@ Interpret the single-word output:
 - `needs_auth` (or any other output) — tell the SE:
   > "Slack MCP needs authentication before we continue. It powers customer canvas lookups during sparring and the post-deployment handover canvas.
   >
-  > **Run `/mcp-auth` in this session now.** A browser window will open for Salesforce SSO.
+  > **Run `/mcp` in this session now.** Select 'slack' from the MCP server list (under User MCPs) and hit 'Enter'. A browser window will open that will prompt you to authenticate. Select 'Salesforce Internal' and log in.
   >
-  > For headless/SSH environments, use `/mcp-device-auth` instead.
-  >
-  > When you're back, type `continue` and I'll verify and proceed to org setup. If you'd rather skip Slack entirely for now, type `skip` — Slack features will stay dormant until you re-run `/setup-demo-scout`."
+  > When you're back, type `continue` and I'll verify and proceed to org setup.
 
 Wait for the SE's reply.
 
@@ -120,10 +118,9 @@ Three commands to remember:
   /switch-org      – change active demo org
 
 You're in a Claude Code session right now. To return to Terminal, type /exit
-or press Ctrl+D. To come back later, run:
-  cd ~/claude-projects/sf-demo-scout && claude
+or press Ctrl+D.
 
-Prefer VS Code? Open the folder there (File → Open Folder → sf-demo-scout)
+We recommend using Scout in VS Code. Open the Scout folder there (File → Open Folder → sf-demo-scout)
 and launch Claude Code inside the integrated terminal — same command, same result.
 
 Ready to go! Type /scout-sparring to begin — Opus will audit the org and
