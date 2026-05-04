@@ -121,7 +121,7 @@ You're in a Claude Code session inside Terminal right now. Type /exit to finish 
 
 We recommend using Scout in VS Code. Open the Scout folder there (File → Open Folder → sf-demo-scout) and launch the official Anthropic Claude Code extension — same commands, same results.
 
-Once you're there, type /scout-sparring to begin — Opus will audit the org and
+Once you're there, type /scout-sparring to begin — Opus will audit your org and
 create the customer folder as part of the sparring session.
 
 Happy building – thank you for using Scout!
