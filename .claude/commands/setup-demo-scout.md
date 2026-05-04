@@ -119,6 +119,13 @@ Three commands to remember:
   /scout-building  – Opus orchestrator for org deployment (spawns Sonnet sub-agents)
   /switch-org      – change active demo org
 
-Ready to go! Restart VS Code (CMD+Q), then type /scout-sparring to begin.
-Opus will audit the org and create the customer folder as part of the sparring session.
+You're in a Claude Code session right now. To return to Terminal, type /exit
+or press Ctrl+D. To come back later, run:
+  cd ~/claude-projects/sf-demo-scout && claude
+
+Prefer VS Code? Open the folder there (File → Open Folder → sf-demo-scout)
+and launch Claude Code inside the integrated terminal — same command, same result.
+
+Ready to go! Type /scout-sparring to begin — Opus will audit the org and
+create the customer folder as part of the sparring session.
 ```

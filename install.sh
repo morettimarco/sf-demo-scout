@@ -91,6 +91,15 @@ else
   echo "✅ Salesforce CLI up to date."
 fi
 
+# --- 5b. Claude Code CLI (opportunistic self-update) ---
+echo ""
+echo "🔍 Updating Claude Code CLI..."
+if claude update >/dev/null 2>&1; then
+  echo "✅ Claude Code CLI up to date."
+else
+  echo "⚠️  claude update skipped or failed — continuing. (Re-run the Claude install canvas if needed.)"
+fi
+
 # --- 6. Pre-cache MCP server ---
 echo ""
 echo "📦 Pre-caching Salesforce MCP server..."
@@ -286,12 +295,4 @@ fi
 echo ""
 echo "================================"
 echo "✅ Install complete!"
-echo ""
-echo "Next steps:"
-echo "  1. Open VS Code"
-echo "  2. File → Open Folder → select: ~/claude-projects/sf-demo-scout"
-echo "  3. Open the VS Code extension for Claude Code and start a new session"
-echo "  4. Then run /setup-demo-scout in the Claude Code extension to finish Scout setup"
-echo ""
-echo "/setup-demo-scout will finish up setup for you. ☕"
 echo ""

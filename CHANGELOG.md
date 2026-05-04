@@ -2,6 +2,12 @@
 
 Check your last `update.sh` date against the headers below to see what you missed.
 
+## 2026-05-04
+
+- **Install is now one Terminal command.** `curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh | bash` clones, installs, and drops you into a Claude Code session with `/setup-demo-scout` already running. No more Terminal → VS Code → extension → slash-command dance. VS Code becomes a preference, not a step.
+- **Updates land you back in Claude Code automatically.** `update.sh` (or re-running the one-liner) now `exec`s `claude "/setup-demo-scout"` after the reinstall, so Slack + org re-verification happens without you having to remember to launch it.
+- **Claude Code CLI self-updates on every install.** `install.sh` now runs `claude update` alongside `sf update`, so you're never stuck on a stale CLI. Graceful fallback if the update path is unavailable.
+
 ## 2026-04-30
 
 - **Scout now builds flows of every stripe.** Record-triggered (create, update, *and* delete), screen, autolaunched, subflows, scheduled, and platform-event-triggered — all now under autonomous build with the usual single SE confirmation. The flows Scout used to push to your manual checklist as "too complex" are now fair game for a spec. Only the genuinely visual or multi-day ones (orchestration, screen flows with reactive branching or custom components) stay on your plate.
