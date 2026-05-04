@@ -38,12 +38,34 @@ if [ ${#MISSING[@]} -gt 0 ]; then
 fi
 
 # --- 2. Existing install? Route to update.sh ---
-if [ -d "$REPO_DIR" ]; then
+# Only treat the directory as a valid install if it looks like a real Scout
+# clone. A bare directory (or a partial one left over from a failed clone)
+# must NOT be routed to update.sh — update.sh won't exist there.
+if [ -d "$REPO_DIR/.git" ] && [ -f "$REPO_DIR/update.sh" ]; then
   echo "📂 Existing install found at $REPO_DIR"
   echo "   Running update.sh instead..."
   echo ""
   cd "$REPO_DIR"
   exec bash update.sh
+elif [ -d "$REPO_DIR" ]; then
+  echo "⚠️  Found $REPO_DIR but it doesn't look like a valid Scout install."
+  echo "   (Missing .git/ or update.sh — likely a partial clone from an earlier failed update.)"
+  echo ""
+  echo "   This directory will be removed and replaced with a fresh clone."
+  if [ -d "$PROJECTS_DIR/.sf-demo-scout-backup/orgs" ]; then
+    echo "   Your backed-up org data at $PROJECTS_DIR/.sf-demo-scout-backup/orgs will be restored."
+  fi
+  echo ""
+  printf "Continue? [y/N] "
+  read -r CONFIRM
+  if [ "$CONFIRM" != "y" ] && [ "$CONFIRM" != "Y" ]; then
+    echo "Cancelled. Nothing changed."
+    exit 0
+  fi
+  rm -rf "$REPO_DIR"
+  echo "   ✅ Removed $REPO_DIR"
+  echo ""
+  # Fall through to fresh-clone block below.
 fi
 
 # --- 3. Fresh clone ---
@@ -54,12 +76,16 @@ cd "$REPO_DIR"
 echo "   ✅ Cloned to $REPO_DIR"
 echo ""
 
-# --- 4. Run install.sh ---
-echo "⚙️  Running install.sh..."
-bash install.sh
+# --- 4. Restore backup from a prior failed update (if present) ---
+if [ -d "$PROJECTS_DIR/.sf-demo-scout-backup/orgs" ]; then
+  echo "📂 Restoring orgs/ from backup..."
+  cp -R "$PROJECTS_DIR/.sf-demo-scout-backup/orgs" "$REPO_DIR/orgs"
+  echo "   ✅ orgs/ restored"
+  echo ""
+fi
 
-# --- 5. Hand off to Claude Code with /setup-demo-scout queued ---
-echo ""
-echo "🚀 Launching Claude Code with /setup-demo-scout..."
-echo ""
-exec claude "/setup-demo-scout"
+# --- 5. Run install.sh ---
+# install.sh auto-launches `claude "/setup-demo-scout"` at its tail when
+# SF_SCOUT_CHAINED is unset, so bootstrap doesn't need its own exec line.
+echo "⚙️  Running install.sh..."
+exec bash install.sh

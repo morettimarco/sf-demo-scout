@@ -307,3 +307,14 @@ echo ""
 echo "================================"
 echo "✅ Install complete!"
 echo ""
+
+# --- Auto-launch Claude Code with /setup-demo-scout ---
+# Skipped when chained from update.sh (update.sh needs to do cleanup first,
+# and launches claude itself). For standalone `bash install.sh` runs and for
+# bootstrap.sh (which doesn't set the flag), we auto-launch here so the SE
+# doesn't get stranded at a shell prompt wondering what to do next.
+if [ "${SF_SCOUT_CHAINED:-0}" != "1" ]; then
+  echo "🚀 Launching Claude Code with /setup-demo-scout..."
+  echo ""
+  exec claude "/setup-demo-scout"
+fi

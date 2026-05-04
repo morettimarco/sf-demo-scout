@@ -129,10 +129,13 @@ if [ -f "$BACKUP_DIR/.sf/config.json" ]; then
 fi
 
 # --- 6. Run install ---
+# SF_SCOUT_CHAINED=1 tells install.sh NOT to exec claude at its tail — we
+# need control back here to run the cleanup step before launching claude
+# ourselves.
 echo ""
 echo "⚙️  Running install.sh..."
 cd "$REPO_DIR"
-bash install.sh
+SF_SCOUT_CHAINED=1 bash install.sh
 
 # --- 7. Cleanup ---
 rm -rf "$BACKUP_DIR"
