@@ -117,11 +117,12 @@ Three commands to remember:
   /scout-building  – Opus orchestrator for org deployment (spawns Sonnet sub-agents)
   /switch-org      – change active demo org
 
-You're in a Claude Code session right now. To return to Terminal, type /exit
-or press Ctrl+D.
+You're in a Claude Code session inside Terminal right now. Type /exit to finish up.
 
-We recommend using Scout in VS Code. Open the Scout folder there (File → Open Folder → sf-demo-scout) and launch the official Anthropic Claude Code extension — same command, same result.
+We recommend using Scout in VS Code. Open the Scout folder there (File → Open Folder → sf-demo-scout) and launch the official Anthropic Claude Code extension — same commands, same results.
 
-Ready to go! Type /scout-sparring to begin — Opus will audit the org and
+Once you're there, type /scout-sparring to begin — Opus will audit the org and
 create the customer folder as part of the sparring session.
+
+Happy building – thank you for using Scout!
 ```
