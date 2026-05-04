@@ -20,6 +20,13 @@ Invoke these skills via the Skill tool when you need detailed metadata rules:
 
 <!-- IF:DATA_SEEDING -->
 **Script deliverables:** if any Data Seeding item in this spec produces a reusable shell or language script (e.g., a bulk seed script the SE can re-run after a re-spin), invoke the `demo-deployment-rules` skill and read "Script Deliverable Rules" BEFORE finalizing the deliverable. The rule block covers Pattern B (idempotent default), mandatory `--pilot-only` self-test against the live org, bash 3.2 portability, and how self-test bugs split between `issues` and `discovery_notes`.
+
+**Calibration queries (before seeding):** scan the spec's Data Seeding section for lines starting `Calibration:` — these declare that a seed value depends on live org data (e.g. `Calibration: quota = 70-80% of running user's open pipeline — reference query: SELECT SUM(Amount) FROM Opportunity WHERE OwnerId = :runningUserId AND StageName NOT IN ('Closed Won','Closed Lost')`). For each calibration directive:
+1. Run the reference query via `run_soql_query`.
+2. Compute the seed value that satisfies the target ratio/range. If the target is a range, pick the midpoint.
+3. **Auto-apply** the computed value — override any literal number the spec listed for that seed field. The SE chose calibration-by-rule over calibration-by-literal.
+4. Record in `discovery_notes` verbatim: `"Calibration applied: <directive text> — reference query returned <X>, seed value computed as <Y> (spec literal was <Z>)"` so the adjustment surfaces in the change log and the SE sees it in the handover.
+5. **Degraded path:** if the reference query returns 0 rows or errors, fall back to the spec's literal value and record in `issues`: `"Calibration reference query returned no data / failed: <error> — used spec literal <Z>. Adjust manually if needed."` Do not block on calibration — seeding proceeds with the literal.
 <!-- /IF:DATA_SEEDING -->
 
 - Deploy in small increments — never batch unrelated changes.
@@ -129,13 +136,7 @@ Before modifying any page layout, identify which layout is actually active.
 
 <!-- IF:PERMSET -->
 ## Companion Permission Set — MANDATORY
-After deploying objects, fields, record types, tabs, or apps, deploy a permission set:
-- Object CRUD for all new custom objects
-- Field Read + Edit FLS for all new fields (EXCLUDE Required fields — the API rejects FLS on required fields)
-- RecordTypeVisibility: visible=true for new record types
-- TabVisibility: Visible for new custom tabs (not DefaultOn — DefaultOn is Profile-only)
-- AppVisibility: visible=true for new Lightning apps
-Assign via MCP assign_permission_set after deploying the permission set.
+Follow CLAUDE.md §Companion Permission Set for the canonical rules (object CRUD, FLS, RecordTypeVisibility, TabVisibility, AppVisibility, MCP assignment). Phase-specific reminder: **EXCLUDE Required fields from FLS — the API rejects FLS on required fields.**
 <!-- /IF:PERMSET -->
 
 ## Your Spec

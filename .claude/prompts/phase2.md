@@ -169,7 +169,7 @@ Key rules for updating the triggering record:
 - Field assignments go in `<inputAssignments>`, not `<filters>`
 - This pattern works for after-save triggers — before-save triggers use `$Record` assignments directly in the start element
 
-Screen flow template lives at `.claude/skills/sf-flow/assets/screen-flow-template.xml` (full clone guarantees presence). For screen flows, two rules from the asset that tend to get lost: root-level elements must stay in strict alphabetical order (apiVersion → description → environments → interviewLabel → label → processType → recordCreates → screens → start → status → variables), and in `recordLookups` always specify `<queriedFields>` explicitly — never `<storeOutputAutomatically>true</storeOutputAutomatically>` on screen flows (data-leak risk, especially on Experience Cloud).
+Screen flow template lives at `.claude/skills/sf-flow/assets/screen-flow-template.xml` (full clone guarantees presence). Before authoring a screen flow, skim `.claude/skills/sf-flow/references/xml-gotchas.md` — it carries the root-level alphabetical ordering rule and the `storeOutputAutomatically` data-leak rule among other traps. (Already referenced at the top of Flow Rules, restated here because screen flows are where these two specifically bite.)
 
 **FlowTest template** (applies to every autonomous flow type — type-specific adaptations in step 4 above). Save as `[FlowApiName]_Test.flowTest-meta.xml`, deploy alongside the flow, then run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`:
 ```xml

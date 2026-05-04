@@ -50,34 +50,37 @@ Run a single MCP probe to confirm connectivity:
   > If this persists, check that .mcp.json exists in the project root."
   Stop. Do not proceed without MCP.
 
-**Check for pending update:** Read `.claude/.update-available`. If it exists, parse `commits_behind=<N>` and `recent_changes=<bullets separated by ` | `>`.
-
 ### Model gate
 
-Emit as a standalone message. Include the bracketed update block only if `.claude/.update-available` exists; omit the block entirely otherwise.
+Run `test -f .claude/.update-available` to branch. The two variants below are the ONLY blocks allowed — do not edit them at runtime, do not mix them, do not inline any conditional markup.
+
+**Variant A — no pending update (flag file absent).** Emit verbatim as a standalone message:
 
 > "Scout Sparring is designed for Opus.
 > Run `/model opus` now if you haven't already — your conversation history is preserved.
 >
-> [--- *include only if update flag exists* ---
+> Confirm you're on Opus. (yes)"
+
+**Variant B — update pending (flag file exists).** Read `.claude/.update-available` and parse `commits_behind=<N>` and `recent_changes=<bullets separated by ` | `>`. Substitute `{{N}}` with `commits_behind`, and emit one `> - {{bullet}}` line per bullet (split on ` | `, up to 3). If `recent_changes` is empty, omit the "Recent changes:" header and its bullet lines; keep everything else.
+
+> "Scout Sparring is designed for Opus.
+> Run `/model opus` now if you haven't already — your conversation history is preserved.
 >
-> ⚠️ **SF Demo Scout update available** ([N] commit(s) behind main)
+> ⚠️ **SF Demo Scout update available** ({{N}} commit(s) behind main)
 >
 > Recent changes:
-> - [bullet 1]
-> - [bullet 2]
-> - [bullet 3]
+> - {{bullet 1}}
+> - {{bullet 2}}
+> - {{bullet 3}}
 >
 > To update: run `bash update.sh` in Terminal (your org data is preserved). VS Code will close — reopen after.
 > To proceed without updating: reply `proceed` (dismissed for this session only).
 >
-> ---]
->
-> Confirm you're on Opus[, and if an update is pending, tell me update vs. proceed]. (yes)"
+> Confirm you're on Opus, and tell me update vs. proceed. (yes)"
 
-Substitution rules when the flag exists: `[N]` = `commits_behind`; bullets split on ` | ` (use exactly as many as present, up to 3). If `recent_changes` is empty, omit the "Recent changes" lines but keep the dividers. Do not write to or delete the flag file — the next `session-startup.sh` run refreshes it.
+Do not write to or delete the flag file — the next `session-startup.sh` run refreshes it.
 
-**Wait for the SE's confirmation before proceeding to Stage 2.** If the SE chose to update, they will close VS Code — do not advance. If they replied `proceed`, advance normally.
+**Wait for the SE's confirmation before proceeding to Stage 2.** If the SE chose to update, they will close VS Code — do not advance. If they replied `proceed` (Variant B) or `yes` (either variant), advance normally.
 
 ---
 

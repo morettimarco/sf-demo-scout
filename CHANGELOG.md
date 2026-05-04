@@ -7,6 +7,10 @@ Check your last `update.sh` date against the headers below to see what you misse
 - **Install is now one Terminal command.** `curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh | bash` clones, installs, and drops you into a Claude Code session with `/setup-demo-scout` already running. No more Terminal → VS Code → extension → slash-command dance. VS Code becomes a preference, not a step.
 - **Updates land you back in Claude Code automatically.** `update.sh` (or re-running the one-liner) now `exec`s `claude "/setup-demo-scout"` after the reinstall, so Slack + org re-verification happens without you having to remember to launch it.
 - **Claude Code CLI self-updates on every install.** `install.sh` now runs `claude update` alongside `sf update`, so you're never stuck on a stale CLI. Graceful fallback if the update path is unavailable.
+- **Scout now calibrates seed data against your live org.** Tell the spec "quota = 70-80% of running user's open pipeline" instead of a literal number, and Phase 1 runs the reference SOQL before seeding and computes the right count. Stops the 881%-quota-coverage class of miss when a seed script meets a real org's actual numbers.
+- **Agentforce permset auto-assigns after activate.** Scout probes for the standard runtime permset (`AgentforceEmployeeAgentUser` / `AgentforceServiceAgentUser` / `AgentforceUser`, by agent type and org edition) and assigns it to your demo user. One less manual step between publish and a working agent in the UI.
+- **Handover brief reorganized.** Three buckets now: what Scout did (change-log mirror), what's yours (UI-only steps like page layout arrangement), and how to iterate (reminder that `/scout-sparring` works on existing demos too). Reads less like a launch gate, more like an ongoing collaboration.
+- Sparring starts cleaner — model gate no longer mid-message rewrites itself when a Scout update is pending.
 
 ## 2026-04-30
 

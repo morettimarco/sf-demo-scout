@@ -18,13 +18,26 @@ Format (output as plain text, not a blockquote):
 (Derive from spec's Business story + Core capability + Pain point addressed.
 Use "Show the customer..." framing. 3-5 steps.)
 
-**Before You Demo**
+**Already Done (Scout handled this)**
+Synthesise from the change log — reassure the SE about what they do NOT own. Each bullet is a plain statement of a completed fact, not a checkbox. Include whichever of the following are present in the change log:
+- Companion permset deployed and assigned to the running user: [name]
+- Standard Agentforce runtime permset assigned: [name] (only if `deployed.standard_permset_assignment.status = "SUCCESS"`)
+- Deployed metadata summary in one line: [N objects, N fields, N flows, N Apex classes, N LWC, N Agentforce agents — pull from change log counts]
+- Data seeded: [object counts — pull from change log]
+- Calibration applied (only if `discovery_notes` carries a `"Calibration applied:"` entry): [directive — reference query returned X, seed value computed as Y, spec literal was Z]
+- Agentforce smoke test: [pass/fail count from change log]
+
+**Your Setup (Salesforce UI — no API path)**
+These are Salesforce platform limits, not Scout gaps — the Metadata API does not expose these surfaces, so no tool can automate them. Populate from the spec's SE Manual Checklist + the change log's "SE Must Do Next":
 - [ ] [SE Manual Checklist items from spec + change log "SE Must Do Next", rephrased with Setup navigation paths where applicable]
 
-**For each `actions_unverified_in_preview` entry in the change log, append a checklist item.** The canonical definition of this field lives in `.claude/prompts/phase3.md`. Formatting rules:
+**For each `actions_unverified_in_preview` entry in the change log, append a checklist item under Your Setup.** The canonical definition of this field lives in `.claude/prompts/phase3.md`. Formatting rules:
 - **Knowledge grounding entry:** append verbatim:
   - [ ] After creating the Data Library, run one grounded utterance in Builder (e.g. an utterance that should pull from a specific Knowledge article) and confirm a citation or source reference appears in the response. If the response is plausible prose without a source, the Data Library is not linked — fix before demo.
 - **Any other entry** (MessagingSession-dependent actions, etc.): append one line per entry in the form `- [ ] [action name]: [reason from the entry]`.
+
+**Want to Change Something? Iterate It.**
+This demo isn't locked. If the seeded data doesn't fit the narrative, a topic reads flat, the CIO angle needs sharpening, or the customer just asked for a different headline — open a fresh Claude Code session and run `/scout-sparring`. Tell Scout what you want to change; it'll write a new spec, and `/scout-building` re-deploys over the top. Iterating an existing demo is a first-class Scout capability — not a restart.
 
 **Your Files**
 All files for this demo live in one folder. To open it in Finder:

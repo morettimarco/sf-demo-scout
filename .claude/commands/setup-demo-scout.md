@@ -6,7 +6,7 @@ model: sonnet
 allowed-tools: Bash, Read, Write, mcp__Salesforce_DX__list_all_orgs
 ---
 
-# SF Demo Prep — Org Setup
+# SF Demo Scout — Org Setup
 
 You are completing the one-time org setup for a Salesforce Solutions Engineer.
 The project files are already in place from the GitHub clone. Your job is to:
@@ -107,7 +107,7 @@ If either file already exists, leave it untouched.
 Print this summary to the terminal:
 
 ```
-✅ SF Demo Prep — Setup Complete
+✅ SF Demo Scout — Setup Complete
 ====================================
 Project:    [current directory]
 Org:        [alias] ([username])

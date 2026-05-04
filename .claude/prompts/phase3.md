@@ -50,6 +50,21 @@ For agents already in the org. Every publish creates a new version; rollback via
 **Minimum coverage:** send at least 3 utterances (or all, if fewer than 3 in the spec). If utterance #1 fails, send at least 2 more to determine whether the failure is routing-specific or universal. Different utterances test different routing paths — only skip remaining utterances if 3+ consecutive failures produce the identical error message.
 A failed smoke test does NOT block deployment. Record failures in `issues`.
 
+### Standard Agentforce Runtime Permset (after activate)
+After the agent is active, assign the correct standard Agentforce runtime permset to the running user (not the Einstein Agent User — that one is auto-provisioned by the `sf agent` CLI).
+
+1. Probe the org for which standard runtime permset exists — Salesforce naming varies by edition:
+   ```sql
+   SELECT Name FROM PermissionSet WHERE Name IN ('AgentforceEmployeeAgentUser','AgentforceServiceAgentUser','AgentforceUser')
+   ```
+2. Preference order (pick the first that exists in the org):
+   - If the deployed agent's type is `AgentforceEmployeeAgent` → prefer `AgentforceEmployeeAgentUser`, else `AgentforceServiceAgentUser`, else `AgentforceUser`.
+   - If the deployed agent's type is `AgentforceServiceAgent` → prefer `AgentforceServiceAgentUser`, else `AgentforceUser`, else `AgentforceEmployeeAgentUser`.
+3. Assign the selected permset to the **running user** (the SE's demo user, resolved from `{{ORG_USERNAME}}`) via MCP `assign_permission_set`. Record the result in `deployed.standard_permset_assignment`.
+4. If none of the three permsets exist in the org, record in `discovery_notes` verbatim: `"No standard Agentforce runtime permset found in org — SE must confirm which permset their edition uses and assign manually."` Set `deployed.standard_permset_assignment.status = "NOT_FOUND"`. Do NOT broaden the probe to `LIKE 'Agentforce%'` — some Agentforce permsets (e.g. Agentforce Sales Coach) are agent-user-only and explicitly must not be assigned to regular users per Salesforce documentation.
+
+This permset is separate from the spec's Companion permset — the Companion covers custom objects/fields/FLS; this one grants access to the Agentforce runtime.
+
 ### Always Out of Scope (skip with reason "SE Manual Checklist")
 - Multi-agent orchestration
 - Custom model/LLM config
@@ -71,7 +86,8 @@ Return EXACTLY one fenced JSON block matching this schema. Do not include any pr
   "deployed": {
     "agent": {"api_name": "string", "version": 0, "status": "Active|Inactive"},
     "backing_actions": [{"type": "ApexClass|Flow|StandardAction", "api_name": "string", "status": "SUCCESS|FAILED"}],
-    "agent_user": {"username": "string", "created_by_cli": true}
+    "agent_user": {"username": "string", "created_by_cli": true},
+    "standard_permset_assignment": {"name": "string|null", "assigned_to": "string|null", "status": "SUCCESS|FAILED|NOT_FOUND"}
   },
   "smoke_test": {
     "ran": true,
