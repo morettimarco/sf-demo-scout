@@ -305,7 +305,8 @@ fi
 # --- Done ---
 echo ""
 echo "================================"
-echo "✅ Install complete!"
+echo "✋ Initial setup complete! Launching Claude Code now to finish up."
+echo "This will take a moment, please do not close this Terminal window ..."
 echo ""
 
 # --- Auto-launch Claude Code with /setup-demo-scout ---
