@@ -132,10 +132,39 @@ fi
 # SF_SCOUT_CHAINED=1 tells install.sh NOT to exec claude at its tail — we
 # need control back here to run the cleanup step before launching claude
 # ourselves.
+# install.sh exit 2 = partial skill-sync failure (repo is fine, just missing
+# some external skills). Don't trigger the nuclear ERR trap for that — repo
+# is already re-cloned and org data restored; the SE just needs to retry sync.
 echo ""
 echo "⚙️  Running install.sh..."
 cd "$REPO_DIR"
+set +e
 SF_SCOUT_CHAINED=1 bash install.sh
+INSTALL_EXIT=$?
+set -e
+
+if [ $INSTALL_EXIT -eq 2 ]; then
+  trap - ERR
+  rm -rf "$BACKUP_DIR"
+  rm -f "$TMP_SCRIPT"
+  echo ""
+  echo "================================"
+  echo "⚠️  Update completed with skill-sync warnings"
+  echo "================================"
+  echo ""
+  echo "The repo updated successfully and your org data was restored,"
+  echo "but one or more external skills failed to sync."
+  echo ""
+  echo "Retry the sync with:"
+  echo ""
+  echo "   bash $REPO_DIR/.claude/scripts/sync-skills.sh"
+  echo ""
+  echo "If that still fails, paste the output in #sf-demo-scout."
+  echo ""
+  exit 0
+elif [ $INSTALL_EXIT -ne 0 ]; then
+  false
+fi
 
 # --- 7. Cleanup ---
 rm -rf "$BACKUP_DIR"

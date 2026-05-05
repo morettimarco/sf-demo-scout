@@ -40,6 +40,7 @@ temp-*
 manifest/
 tmp_*
 data/
+.cursor/
 
 # Editor
 .vscode/
