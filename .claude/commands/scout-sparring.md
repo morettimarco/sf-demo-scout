@@ -88,6 +88,12 @@ Do not write to or delete the flag file — the next `session-startup.sh` run re
 
 Run `sf config get target-org --json` and `sf org display --json`. Extract alias and username.
 
+**If `sf org display` fails** (no org connected, or auth expired): emit this as a standalone message and stop.
+
+> "No demo org connected. Run `/switch-org` to connect one, then re-run `/scout-sparring`."
+
+Do not continue to audit routing without an org.
+
 Output as a single message, then wait for the SE's reply:
 > "Active org: [alias] ([username]). Right org, or switch? (run /switch-org)
 >
