@@ -110,6 +110,33 @@ Accumulated lessons from scout-building sessions. Add new lessons at the end wit
 
 If either file already exists, leave it untouched.
 
+## Step 2.6: Enable Visible Thinking Summaries
+
+Write the adaptive-thinking env var to `.claude/settings.local.json` (project-scope, gitignored). It's deferred until now because the committed `.claude/settings.json` cannot carry this setting — Claude Code's auxiliary model paths sometimes resolve to older Sonnet variants (e.g. `claude-sonnet-4-5-20250929`) that reject the adaptive-thinking protocol and brick first-launch sessions. By session 2 (after the SE restarts at the end of Step 3), only the SE's session model reads this — and Opus/Sonnet 4.6/4.7 all support it.
+
+Run this Python merge — it preserves any existing keys (permission grants, etc.) and is idempotent if the SE re-runs setup:
+
+```bash
+python3 - <<'PYEOF'
+import json, os
+path = ".claude/settings.local.json"
+data = {}
+if os.path.exists(path):
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except json.JSONDecodeError:
+        data = {}
+data.setdefault("env", {})
+data["env"]["CLAUDE_CODE_EXTRA_BODY"] = '{"thinking":{"type":"adaptive","display":"summarized"}}'
+with open(path, "w") as f:
+    json.dump(data, f, indent=2)
+print("✅ Visible thinking enabled (takes effect after restart)")
+PYEOF
+```
+
+If the command succeeds, continue silently to Step 3. If it fails (Python error, write permission), tell the SE: *"Couldn't enable visible thinking summaries — Scout will still work, but you won't see Opus's reasoning during slow operations. Continuing."*
+
 ## Step 3: Show Setup Summary
 
 Branch the `Org:` line on `ORG_CONNECTED`. If `true`, print `Org:        [alias] ([username])`. If `false`, print `Org:        none yet — run /switch-org when you're ready`.
@@ -127,7 +154,7 @@ Three commands to remember:
   /scout-building  – Opus orchestrator for org deployment (spawns Sonnet sub-agents)
   /switch-org      – change active demo org
 
-You're in a Claude Code session inside Terminal right now. Type /exit to finish up.
+You're in a Claude Code session inside Terminal right now. Type /exit to finish up here.
 
 We recommend using Scout in VS Code. Open the Scout folder there (File → Open Folder → sf-demo-scout) and launch the official Anthropic Claude Code extension — same commands, same results.
 ```
