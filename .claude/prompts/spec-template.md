@@ -15,9 +15,16 @@ Org Audit Used: audit-[YYYY-MM-DD]-[HHmm].md
 - **Company:**
 - **Industry vertical:**
 - **Key pain point:**
-- **Value theme:**
 - **Demo stakeholders:**
 - **Competitive context:**
+
+### Value Spine
+Drafted in Stage 6a, refined with SE. The narrative the build proves against. Empty slots are honest gaps — leaving them visible is intentional, not an error.
+- **Residual Message:** [one sentence — the one thing the room remembers]
+- **Audience:** [who carries this message away — altitude-setter]
+- **KP1 — Pain:** [what's broken today, ideally a direct customer quote]
+- **KP2 — Cost of Inaction:** [what staying with the status quo costs — metric if available, or "gap — SE to fill"]
+- **KP3 — Future State:** [the concrete outcome with visible contrast to KP1]
 
 ## Release Notes & Citations
 Docs consulted during sparring (Platform & Data Model Research — Stage 5, plus any residual checks in Stage 7). Empty if scenario uses only established patterns.
@@ -114,6 +121,7 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 
 ### Flows (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this flow makes a KP land in the demo]
 - Plain English: [description]
 - Flow name: [ApiName]
 - Flow type: one of **record-triggered** (before-save / after-save / before-delete) | **autolaunched** | **subflow** | **scheduled** | **platform-event-triggered**
@@ -127,6 +135,7 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 
 ### Screen Flows (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this screen flow makes a KP land in the demo]
 - Plain English: [what the user sees and accomplishes]
 - Flow name: [ApiName], Type: Screen Flow
 - Screen count: [1-3 default; if 4-5, add SE justification sentence below]
@@ -147,17 +156,20 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 
 ### Apex (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this Apex makes a KP land in the demo]
 - Plain English: [description]
 - Name: [name], Object: [single], Logic: [steps]
 
 ### LWC Components (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this LWC makes a KP land in the demo]
 - Plain English: [behaviour]
 - Name: [name], Location: [page], Data: [objects/fields], SLDS: [pattern]
 
 ### Agentforce (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
 - ⚠️ Deploys last — ADLC skills are large; org config completes first
+- **Proves:** KP[1|2|3] — [one line: how this agent makes a KP land in the demo]
 - Path: New Agent / Modify Existing Agent (specify which)
 - Plain English: [what agent does, why it strengthens demo]
 - Agent: [name], Type: AgentforceEmployeeAgent / AgentforceServiceAgent

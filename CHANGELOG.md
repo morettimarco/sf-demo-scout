@@ -2,6 +2,13 @@
 
 Check your last `update.sh` date against the headers below to see what you missed.
 
+## 2026-05-06
+
+- **Sparring now drafts a value spine before the scenario proposal.** Scout reads what you've shared in discovery and emits a one-screen draft — residual message, three key points (pain / cost of inaction / future state), and the audience whose reaction matters. Empty slots show as visible gaps, not as questions you have to answer. Edit, sharpen, or just say "move on" — the spine is guidance, never a gate.
+- **Scenario proposals now cite which key point each component proves.** Flow, Apex, LWC, and Agentforce sections each carry a one-line `Proves: KP[n]` tag. The cut gate uses it: cuts should leave the residual message standing; if a cut breaks a key point, that's the load-bearing one.
+- **Discovery questions sharpened, not added.** Q1 asks for the customer's direct quote on the pain point (quotes survive into the residual message almost untouched). Q3 asks for a concrete 12-month outcome or metric, not a fuzzy definition of success. Question count stays at 6.
+- **Install fixed: Opus 4.7 thinking is hidden again.** Anthropic removed `adaptive` thinking display in 4.7, which left the `CLAUDE_CODE_EXTRA_BODY` env var in `.claude/settings.json` crashing Claude on any version below 4.6 — including breaking fresh installs. Hotfix removed the env var. Tradeoff: the 2026-04-29 "Scout now thinks visibly" feature is rolled back; Opus 4.7 will run with hidden thinking until Anthropic restores a working display mode. Slow operations may once again read as "is it hung?" — emit a status line before any slow op (this was always the underlying defense; the env var was the convenience layer).
+
 ## 2026-05-04
 
 - **Install is now one Terminal command.** `curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh | bash` clones, installs, and drops you into a Claude Code session with `/setup-demo-scout` already running. No more Terminal → VS Code → extension → slash-command dance. VS Code becomes a preference, not a step.

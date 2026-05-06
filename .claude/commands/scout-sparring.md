@@ -158,9 +158,9 @@ For **new scenario** and **reuse-org**: proceed to Stage 4 below.
 Produce a structured summary: customer profile, key pain points (direct quotes), stakeholders, competitive context, gaps.
 
 Ask max 6 clarifying questions:
-1. Single most compelling pain point
+1. Single most compelling pain point — in the customer's words if you have a direct quote
 2. **Which Salesforce clouds?** If this is an industry cloud (Health Cloud, Life Sciences Cloud, Financial Services Cloud, Manufacturing Cloud, etc.), name it — it determines the data model. If the audit found non-universal standard objects with data, mention them: "The audit found [objects] — this looks like [cloud]. Confirm?"
-3. Customer's definition of success
+3. Customer's definition of success — a concrete outcome or metric they'd point to in 12 months
 4. Which stakeholder's reaction matters most
 5. **Which existing app and objects from the audit should anchor the demo?** Show the star-flagged items and ask the SE to confirm or redirect.
 6. **Any specific Salesforce feature you want to showcase?** (Agentforce, Data Cloud, a specific Flow pattern, a guided screen flow / wizard, an industry-specific capability — or "nothing specific, you decide")
@@ -196,7 +196,15 @@ After the procedure completes and the SE confirms the findings, proceed per the 
 
 ## Stage 6: Full Scenario Definition
 
+### Value Spine (co-emergence)
+
+Read `.claude/prompts/sparring-value-story.md` and execute the Drafting Rules + Output Format. Draft the spine from Stages 2–5 context — do NOT ask the SE for new input. Surface gaps as gaps. Wait for the SE to acknowledge (edit, sharpen, or "move on") before proceeding to Scenario Proposal.
+
+### Scenario Proposal (anchored to spine)
+
 Propose exactly 1 scenario: name, 2-sentence business story, core capability, why it addresses the #1 pain point, what exists vs what must be built, conflicts, whether LWC or Agentforce would strengthen the demo, assumptions, risks. Actively evaluate whether an Agentforce agent would strengthen the demo — if the scenario involves data retrieval, account intelligence, guided processes, or rep enablement, propose an agent and explain why.
+
+Tag each gated build category (Flow / Apex / LWC / Agentforce) in the proposal message with `Proves: KP[n]` referencing the spine above. Components without a clear KP cite — challenge in the proposal ("X doesn't obviously prove KP1/2/3 — does it earn its slot, or cut it?").
 
 **The scenario must be grounded in Stage 5 research.** Every data model choice should trace back to a doc finding or an audit star item. If you propose a custom object, show that no standard or industry object covers it — citing both the audit and the doc search.
 
@@ -216,11 +224,11 @@ Evaluate: genuine Salesforce strength? Achievable within build boundaries (see C
 
 Wait for the SE's answer. Evaluate BOTH halves:
 
-1. **Prioritization:** Produce a concrete reduced-scope version based on what they'd cut: "Here's what the demo looks like with those cuts: [reduced scenario summary]. Is this still a viable demo, or did we cut something load-bearing?" If the SE cannot articulate what to cut, that's a signal the scenario is either too thin or the SE hasn't internalised the customer's priorities — say so directly.
+1. **Prioritization:** Produce a concrete reduced-scope version based on what they'd cut: "Here's what the demo looks like with those cuts: [reduced scenario summary]. Is this still a viable demo, or did we cut something load-bearing?" Reference the spine: "Cuts should leave the residual message standing. If a cut breaks KP[n], that's the load-bearing one — keep it." If the SE cannot articulate what to cut, that's a signal the scenario is either too thin or the SE hasn't internalised the customer's priorities — say so directly.
 
 2. **Customer evidence:** If the SE's answer doesn't reference a specific customer statement or pain point, push back: "You answered what to cut, but which specific customer statement tells you the rest is essential?"
 
-Both halves must be resolved before proceeding to Stage 6b.
+Both halves must be resolved before proceeding to Stage 6b (data shape validation).
 
 ---
 
