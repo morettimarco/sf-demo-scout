@@ -1,6 +1,6 @@
 # Showtime Happy-Path Shortlist
 
-Pre-vetted scenarios Scout has run end-to-end on real demo orgs without surprise rollback. Loaded by `sparring-showtime.md` Step S4. Maintained by hand via /project-sparring sessions — not auto-updated.
+Pre-vetted scenarios Scout has run end-to-end on real demo orgs without surprise rollback. Loaded by `sparring/showtime.md` Step S4. Maintained by hand via /project-sparring sessions — not auto-updated.
 
 ## How to Read This File
 

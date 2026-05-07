@@ -9,7 +9,7 @@ The SE is in (or just after) a live customer conversation. The audit was run BEF
 ## Premise
 
 - The transcript replaces the 6-question discovery round.
-- The happy-path shortlist (`.claude/prompts/showtime-happy-paths.md`) constrains what Scout can propose. Scout cannot invent novel scenarios in Showtime — only patterns Scout has run end-to-end ≥3× cleanly.
+- The happy-path shortlist (`.claude/prompts/sparring/showtime-happy-paths.md`) constrains what Scout can propose. Scout cannot invent novel scenarios in Showtime — only patterns Scout has run end-to-end ≥3× cleanly.
 - The value spine survives, but is auto-drafted silently and emitted inline with each scenario card. No SE-acknowledgement round, no gaps-as-questions.
 - One iteration round only. After SE picks/sharpens, Scout writes the spec — no further loops.
 
@@ -23,7 +23,7 @@ The audit must already exist in `orgs/[alias]-[customer]/`. Check for `audit-*.m
 
 > "Showtime expects the audit to be done before the customer call — that's the SE prep step. I can run the audit now if the customer is on a break (~5–10 min), or you can switch to `/scout-sparring` → New scenario for a full flow with embedded audit. Which?"
 
-Wait for SE reply. If "run audit now" — read `.claude/prompts/sparring-audit-orchestration.md` and execute. If switch to New — return to main command Stage 3 with intent=new.
+Wait for SE reply. If "run audit now" — read `.claude/prompts/sparring/audit-orchestration.md` and execute. If switch to New — return to main command Stage 3 with intent=new.
 
 ## Step S2 — Transcript Paste
 
@@ -45,11 +45,11 @@ From the transcript, extract — do NOT emit yet:
 - **Audience:** which stakeholder's reaction matters most — usually the one who spoke most or whose decision unblocks the others
 - **Residual Message:** one sentence the room remembers
 
-Read `.claude/prompts/sparring-value-story.md` Drafting Rules for the spine constraints (one sentence per slot, contrast in KP3 must be visible, no vendor language, audience drives altitude). Do NOT execute its Output Format — Showtime emits the spine inline with scenarios in S4, not as a standalone message.
+Read `.claude/prompts/sparring/value-story.md` Drafting Rules for the spine constraints (one sentence per slot, contrast in KP3 must be visible, no vendor language, audience drives altitude). Do NOT execute its Output Format — Showtime emits the spine inline with scenarios in S4, not as a standalone message.
 
 ## Step S4 — Constrained Scenario Proposal
 
-Read `.claude/prompts/showtime-happy-paths.md`. Match transcript signal + audit star items against the shortlist:
+Read `.claude/prompts/sparring/showtime-happy-paths.md`. Match transcript signal + audit star items against the shortlist:
 
 - **Tier 1 patterns** (LOW complexity, deploys cleanly) are the default proposal pool.
 - **Tier 2 patterns** (MEDIUM, pre-staging required) are eligible only if the SE briefing confirmed pre-staging is done.
@@ -96,7 +96,7 @@ Do NOT loop further. One iteration, then spec.
 
 ## Step S6 — Data Shape Validation (conditional)
 
-If the chosen scenario includes Apex, Flow, or Agentforce that queries or writes objects: read `.claude/prompts/sparring-data-shape.md` and execute. If pure config (fields, layouts, custom labels, seed only): skip.
+If the chosen scenario includes Apex, Flow, or Agentforce that queries or writes objects: read `.claude/prompts/sparring/data-shape.md` and execute. If pure config (fields, layouts, custom labels, seed only): skip.
 
 ## Step S7 — Spec Generation
 

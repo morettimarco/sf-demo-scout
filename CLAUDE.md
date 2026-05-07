@@ -88,4 +88,4 @@ sf data create record --sobject PermissionSetAssignment --values "PermissionSetI
 - Deployment rules: `.claude/skills/demo-deployment-rules/SKILL.md`
 - Org audit format: `.claude/skills/demo-org-audit/SKILL.md`
 - Spec template: `.claude/prompts/spec-template.md`
-- Change log template: `.claude/prompts/change-log-template.md`
+- Change log template: `.claude/prompts/building/change-log-template.md`

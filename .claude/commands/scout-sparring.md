@@ -106,7 +106,7 @@ Output as a single message, then wait for the SE's reply:
 >
 > What shall it be, and for what customer?"
 
-Wait for the SE's reply. Read `.claude/prompts/sparring-customer-normalization.md` and execute the procedure — it normalizes the customer name to a folder-safe slug and prompts the SE on existing-folder matches.
+Wait for the SE's reply. Read `.claude/prompts/sparring/customer-normalization.md` and execute the procedure — it normalizes the customer name to a folder-safe slug and prompts the SE on existing-folder matches.
 
 **Org folder:** `orgs/[alias]-[customer]/`
 
@@ -116,7 +116,7 @@ Wait for the SE's reply. Read `.claude/prompts/sparring-customer-normalization.m
 
 The SE selected one of three paths in Stage 2. Confirm and branch.
 
-**If the SE selected "Showtime":** read `.claude/prompts/sparring-showtime.md` and execute its procedure end-to-end. It handles audit confirmation, transcript intake, scenario proposal, and spec generation. Do not proceed to Stage 4+ in this command — Showtime returns to the main command only after spec is on disk, then exits cleanly.
+**If the SE selected "Showtime":** read `.claude/prompts/sparring/showtime.md` and execute its procedure end-to-end. It handles audit confirmation, transcript intake, scenario proposal, and spec generation. Do not proceed to Stage 4+ in this command — Showtime returns to the main command only after spec is on disk, then exits cleanly.
 
 **If the SE selected "A new demo scenario":** intent = new. Continue to Audit Routing below.
 
@@ -132,7 +132,7 @@ Check `orgs/[alias]-[customer]/` for existing audits and change logs.
 
 **Reuse branch (audit exists, <=7 days old, SE confirms no manual changes):** read the audit markdown file directly. Extract the star-flagged items from it.
 
-**Fresh audit branch (stale >7 days or absent):** Read `.claude/prompts/sparring-audit-orchestration.md` and execute the procedure. This delegates bulk metadata retrieval to 3 parallel Sonnet sub-agents, runs spot-checks, and consolidates results. Opus never reads raw metadata payloads.
+**Fresh audit branch (stale >7 days or absent):** Read `.claude/prompts/sparring/audit-orchestration.md` and execute the procedure. This delegates bulk metadata retrieval to 3 parallel Sonnet sub-agents, runs spot-checks, and consolidates results. Opus never reads raw metadata payloads.
 
 **Reuse-org intent always takes the fresh audit branch** — the SE is reusing an org from a prior customer, so the audit must rediscover what's there regardless of age.
 
@@ -153,11 +153,11 @@ After the audit (fresh or reused), surface the star-flagged items:
 | Iteration | Stage 4i† | run          | Stage 6i†    | run                  | run      |
 | Reuse-org | Stage 4   | skip¹        | Stage 6      | skip²                | run      |
 
-† Iteration stages are in `.claude/prompts/sparring-iteration.md` — read on demand.
+† Iteration stages are in `.claude/prompts/sparring/iteration.md` — read on demand.
 ¹ Skip Stage 5 unless the scenario introduces new objects beyond what the audit covers OR gated categories (Flows, Apex, LWC, Agentforce).
-² Skip Stage 6b unless the scenario has Apex, Flows, or Agentforce actions (objects queried or written to programmatically) OR a Data Seeding section with explicit field mappings. Data seeding triggers the describe-before-spec path inside sparring-data-shape.md.
+² Skip Stage 6b unless the scenario has Apex, Flows, or Agentforce actions (objects queried or written to programmatically) OR a Data Seeding section with explicit field mappings. Data seeding triggers the describe-before-spec path inside sparring/data-shape.md.
 
-For **iteration intent**: read `.claude/prompts/sparring-iteration.md` and execute Stage 4i, then return here for Stage 5.
+For **iteration intent**: read `.claude/prompts/sparring/iteration.md` and execute Stage 4i, then return here for Stage 5.
 For **new scenario** and **reuse-org**: proceed to Stage 4 below.
 
 ---
@@ -182,7 +182,7 @@ Ask max 6 clarifying questions:
 
 ### Slack lookup handling
 
-If the SE's reply names one or more canvases or a channel: read `.claude/prompts/sparring-slack-lookup.md` and execute its procedure with the names as inputs. If the SE answers only 1-6 and doesn't mention Slack: move on to Stage 5 without ceremony — do not re-ask.
+If the SE's reply names one or more canvases or a channel: read `.claude/prompts/sparring/slack-lookup.md` and execute its procedure with the names as inputs. If the SE answers only 1-6 and doesn't mention Slack: move on to Stage 5 without ceremony — do not re-ask.
 
 Slack findings feed scenario proposal as **context only** — attributed, never asserted. Canvas content may shape demo storylines directly (its intended use); SE knowledge and Salesforce docs remain authoritative.
 
@@ -192,14 +192,14 @@ Then proceed to Stage 5 (Platform & Data Model Research).
 
 ## Stage 5: Platform & Data Model Research
 
-Read `.claude/prompts/sparring-platform-research.md` and execute the procedure. It handles:
+Read `.claude/prompts/sparring/platform-research.md` and execute the procedure. It handles:
 - Object capability pre-flight (EntityDefinition + QueueSobject queries)
 - Docs follow-up for restricted objects
 - Search topic inference from audit + discovery
 - Executing searches against Salesforce Docs MCP
 - Surfacing findings for SE review
 
-After the procedure completes and the SE confirms the findings, proceed per the route table in Stage 3. For iterations, read `.claude/prompts/sparring-iteration.md` and execute Stage 6i.
+After the procedure completes and the SE confirms the findings, proceed per the route table in Stage 3. For iterations, read `.claude/prompts/sparring/iteration.md` and execute Stage 6i.
 
 ---
 
@@ -207,7 +207,7 @@ After the procedure completes and the SE confirms the findings, proceed per the 
 
 ### Value Spine (co-emergence)
 
-Read `.claude/prompts/sparring-value-story.md` and execute the Drafting Rules + Output Format. Draft the spine from Stages 2–5 context — do NOT ask the SE for new input. Surface gaps as gaps. Wait for the SE to acknowledge (edit, sharpen, or "move on") before proceeding to Scenario Proposal.
+Read `.claude/prompts/sparring/value-story.md` and execute the Drafting Rules + Output Format. Draft the spine from Stages 2–5 context — do NOT ask the SE for new input. Surface gaps as gaps. Wait for the SE to acknowledge (edit, sharpen, or "move on") before proceeding to Scenario Proposal.
 
 ### Scenario Proposal (anchored to spine)
 
@@ -243,7 +243,7 @@ Both halves must be resolved before proceeding to Stage 6b (data shape validatio
 
 ## Stage 6b: Data Shape Validation
 
-Read `.claude/prompts/sparring-data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 7 after — stopping for SE input only if problems require a design change.
+Read `.claude/prompts/sparring/data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 7 after — stopping for SE input only if problems require a design change.
 
 ---
 

@@ -31,7 +31,7 @@ Synthesise from the change log — reassure the SE about what they do NOT own. E
 These are Salesforce platform limits, not Scout gaps — the Metadata API does not expose these surfaces, so no tool can automate them. Populate from the spec's SE Manual Checklist + the change log's "SE Must Do Next":
 - [ ] [SE Manual Checklist items from spec + change log "SE Must Do Next", rephrased with Setup navigation paths where applicable]
 
-**For each `actions_unverified_in_preview` entry in the change log, append a checklist item under Your Setup.** The canonical definition of this field lives in `.claude/prompts/phase3.md`. Formatting rules:
+**For each `actions_unverified_in_preview` entry in the change log, append a checklist item under Your Setup.** The canonical definition of this field lives in `.claude/prompts/building/phase3.md`. Formatting rules:
 - **Knowledge grounding entry:** append verbatim:
   - [ ] After creating the Data Library, run one grounded utterance in Builder (e.g. an utterance that should pull from a specific Knowledge article) and confirm a citation or source reference appears in the response. If the response is plausible prose without a source, the Data Library is not linked — fix before demo.
 - **Any other entry** (MessagingSession-dependent actions, etc.): append one line per entry in the form `- [ ] [action name]: [reason from the entry]`.

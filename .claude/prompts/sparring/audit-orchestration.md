@@ -38,11 +38,11 @@ Execute this procedure to run a fresh 3-agent parallel audit.
 ## Sub-Agent Dispatch
 
 Read these 3 prompt templates:
-- `.claude/prompts/audit-standard-objects.md`
-- `.claude/prompts/audit-apps-flows-agents.md`
-- `.claude/prompts/audit-custom-objects.md`
+- `.claude/prompts/sparring/audit/standard-objects.md`
+- `.claude/prompts/sparring/audit/apps-flows-agents.md`
+- `.claude/prompts/sparring/audit/custom-objects.md`
 
-Read `.claude/prompts/audit-shared.md` once — its content fills `{{AUDIT_SHARED_RULES}}` in all 3 sub-agent prompts.
+Read `.claude/prompts/sparring/audit/shared.md` once — its content fills `{{AUDIT_SHARED_RULES}}` in all 3 sub-agent prompts.
 
 Fill placeholders in each: `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{CUSTOMER}}`, `{{YYYY-MM-DD}}`, `{{HHMM}}`, `{{DEFAULT_APP}}`, `{{DEFAULT_APP_TABS}}`, `{{AUDIT_SHARED_RULES}}`.
 

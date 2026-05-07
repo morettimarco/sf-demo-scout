@@ -13,7 +13,7 @@ description: >
 # Deployment Rules — Canonical Reference
 
 One home per category:
-- **Phase 1** (Queues, Picklists, Page Layouts, Business Processes, Paths) — rules live inlined under IF markers in `.claude/prompts/phase1.md`. This skill file does NOT duplicate them. If a Phase 1 sub-agent needs a rule, it reads its own prompt.
+- **Phase 1** (Queues, Picklists, Page Layouts, Business Processes, Paths) — rules live inlined under IF markers in `.claude/prompts/building/phase1.md`. This skill file does NOT duplicate them. If a Phase 1 sub-agent needs a rule, it reads its own prompt.
 - **Phase 2 and Phase 3** (Flows, Apex, LWC, Agentforce) — phase prompts delegate to external skills (`sf-flow`, `sf-apex`, `sf-lwc`, `developing-agentforce`). This skill file carries the rollback commands, two-attempt meta-rule, unfamiliar-error escalation, and Script Deliverable Rules that the phase prompts reference but do not inline.
 - **Cross-phase** — Script Deliverable Rules (below) apply to any sub-agent producing a reusable shell / language script, regardless of phase.
 
@@ -63,7 +63,7 @@ Autonomous-with-SE-gate flow scope matches `sf-flow`'s full trigger spectrum: re
 2. Before generating, skim `.claude/skills/sf-flow/references/xml-gotchas.md` — root-level alphabetical ordering, fault-connector self-reference, relationship-field traps in recordLookups, `storeOutputAutomatically` data-leak risk. Deployment blockers.
 3. Validate generated XML against the sf-flow checklist. Flag failures in `issues`.
 4. Deploy as Draft first (`<status>Draft</status>`). Confirm success.
-5. Generate and deploy a happy-path FlowTest XML alongside the flow. Run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`. Pass → activate. Fail twice → skip activation, record in `issues` — never activate a flow that failed its own smoke test. Per-type FlowTest adaptations live in `phase2.md` Flow Rules step 4.
+5. Generate and deploy a happy-path FlowTest XML alongside the flow. Run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`. Pass → activate. Fail twice → skip activation, record in `issues` — never activate a flow that failed its own smoke test. Per-type FlowTest adaptations live in `building/phase2.md` Flow Rules step 4.
 6. Check for existing flows on the same object/trigger via `retrieve_metadata` — flag execution order conflicts in `discovery_notes`.
 7. Rollback (record in `rollback_commands`):
    `sf project delete source --metadata Flow:[FlowApiName] --target-org [alias]`

@@ -118,13 +118,13 @@ If only Phase 1 applies:
 
 ### Sub-Agent Output Validation
 
-After EVERY sub-agent returns, load `.claude/prompts/sub-agent-validation.md` and run the validation procedure before proceeding. The procedure covers JSON parse checks, per-phase required-keys lists, empirical org-probe queries for schema-drift-with-successful-deployment, and the retry-or-skip gate when the org confirms an incomplete deployment.
+After EVERY sub-agent returns, load `.claude/prompts/building/sub-agent-validation.md` and run the validation procedure before proceeding. The procedure covers JSON parse checks, per-phase required-keys lists, empirical org-probe queries for schema-drift-with-successful-deployment, and the retry-or-skip gate when the org confirms an incomplete deployment.
 
 ### Phase Prep Procedure
 
 Every phase follows the same prep flow. Per-phase inputs are in the table below.
 
-1. Read the template file from `.claude/prompts/`.
+1. Read the template file from `.claude/prompts/building/`.
 2. If the template has `<!-- IF:... -->` markers, strip blocks whose tag has no matching content in the spec (marker comments included).
 3. Replace every `{{PLACEHOLDER}}` with the content listed in the phase's row below. Do not inject skill file contents — sub-agents invoke skills by name via the Skill tool.
 4. Spawn: `Agent(description="[row's description]", model="sonnet", prompt=[constructed prompt])`.
@@ -132,9 +132,9 @@ Every phase follows the same prep flow. Per-phase inputs are in the table below.
 
 | Phase | Template | IF markers | Placeholders | Agent description |
 |-------|----------|------------|--------------|-------------------|
-| 1 | `.claude/prompts/phase1.md` | `QUEUES`, `LAYOUTS`, `PERMSET`, `STRUCTURAL`, `PICKLISTS`, `DATA_SEEDING`, `BUSINESS_PROCESS`, `PATHS` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{SPEC_SECTIONS}}` (Objects & Fields, Record Types, Permission Set, Data Seeding, Page Layouts, Lightning App / Tabs, Business Processes, Paths) | `Phase 1: Org Config deployment` |
-| 2 | `.claude/prompts/phase2.md` | `FLOWS`, `APEX`, `LWC` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PHASE1_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Flows, Apex, LWC sections) | `Phase 2: Flows/Apex/LWC deployment` |
-| 3 | `.claude/prompts/phase3.md` | *(none)* | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PRIOR_PHASES_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Agentforce section) | `Phase 3: Agentforce deployment` |
+| 1 | `.claude/prompts/building/phase1.md` | `QUEUES`, `LAYOUTS`, `PERMSET`, `STRUCTURAL`, `PICKLISTS`, `DATA_SEEDING`, `BUSINESS_PROCESS`, `PATHS` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{SPEC_SECTIONS}}` (Objects & Fields, Record Types, Permission Set, Data Seeding, Page Layouts, Lightning App / Tabs, Business Processes, Paths) | `Phase 1: Org Config deployment` |
+| 2 | `.claude/prompts/building/phase2.md` | `FLOWS`, `APEX`, `LWC` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PHASE1_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Flows, Apex, LWC sections) | `Phase 2: Flows/Apex/LWC deployment` |
+| 3 | `.claude/prompts/building/phase3.md` | *(none)* | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PRIOR_PHASES_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Agentforce section) | `Phase 3: Agentforce deployment` |
 
 ### Phase 1: Org Config
 
@@ -177,7 +177,7 @@ If no, record as skipped. If yes, run the Phase Prep Procedure for Phase 3. Afte
 
 ## Step 7b: Post-Deployment Execution Order Check
 
-Read `.claude/prompts/post-deployment-check.md` and execute the procedure. Flag findings in the change log.
+Read `.claude/prompts/building/post-deployment-check.md` and execute the procedure. Flag findings in the change log.
 
 ---
 
@@ -186,7 +186,7 @@ Read `.claude/prompts/post-deployment-check.md` and execute the procedure. Flag 
 ### 8a: Write Change Log
 
 Consolidate results from all phases into a single change log.
-Use the template in `.claude/prompts/change-log-template.md` (read it when writing the log).
+Use the template in `.claude/prompts/building/change-log-template.md` (read it when writing the log).
 
 The change log must include:
 - Everything from all sub-agent reports (deployed, skipped, permission set, data, issues)
@@ -219,7 +219,7 @@ If approved, read `.claude/prompts/lessons-maintenance.md` and follow the Append
 
 **Do NOT output the brief until 8a and 8b are complete.**
 
-Read `.claude/prompts/demo-handover-brief.md` for the format, then synthesize the brief. Output it to the terminal as plain text (no file written).
+Read `.claude/prompts/building/handover-brief.md` for the format, then synthesize the brief. Output it to the terminal as plain text (no file written).
 
 **Then offer the Slack handover canvas:**
 
