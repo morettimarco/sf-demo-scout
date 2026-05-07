@@ -97,7 +97,12 @@ Do not continue to audit routing without an org.
 Output as a single message, then wait for the SE's reply:
 > "Active org: [alias] ([username]). Right org, or switch? (run /switch-org)
 >
-> Which customer is this for, and what brings you in today?"
+> I can help you with:
+> - **A new demo scenario** — full sparring for a new customer situation, typically on a fresh demo org
+> - **Iterating on an existing demo** — extend or refine work in progress, whether you built it yourself or with Scout
+> - **Showtime** — live customer conversation, transcript-driven, condensed flow
+>
+> What shall it be, and for what customer?"
 
 Wait for the SE's reply. Read `.claude/prompts/sparring-customer-normalization.md` and execute the procedure — it normalizes the customer name to a folder-safe slug and prompts the SE on existing-folder matches.
 
@@ -105,17 +110,19 @@ Wait for the SE's reply. Read `.claude/prompts/sparring-customer-normalization.m
 
 ---
 
-## Stage 3: Intent Classification & Audit Routing
+## Stage 3: Intent Confirmation & Audit Routing
 
-Based on the SE's response to "what brings you in today?", classify the intent.
+The SE selected one of three paths in Stage 2. Confirm and branch.
 
-**New scenario indicators:** discovery notes, transcripts, new customer, "new demo," "starting fresh," broad scope, multiple capabilities mentioned, no reference to existing work.
+**If the SE selected "Showtime":** read `.claude/prompts/sparring-showtime.md` and execute its procedure end-to-end. It handles audit confirmation, transcript intake, scenario proposal, and spec generation. Do not proceed to Stage 4+ in this command — Showtime returns to the main command only after spec is on disk, then exits cleanly.
 
-**Iteration indicators:** references existing demo, names a specific component to add/change, "add an agent," "update the fields," "iterate," mentions a prior session or existing setup.
+**If the SE selected "A new demo scenario":** intent = new. Continue to Audit Routing below.
 
-**Reuse-org indicators:** different customer than prior work on this org, "reusing," "dragging it out," "set this up for X, now for Y," org was built for a different customer. If suspected but not explicit, ask: "Is this org being reused from a prior customer, or is it fresh?"
+**If the SE selected "Iterating on an existing demo":** intent = iteration. Continue to Audit Routing below.
 
-**If ambiguous between new and iteration:** ask a single follow-up: "Are you building on an existing demo for this customer, or starting a new scenario from scratch?"
+**Reuse-org branch:** if the SE chose "new" but their reply suggests they're reusing an org from a prior customer ("set this up for X, now for Y," "dragging it out"), ask once: "Is this org being reused from a prior customer, or is it fresh?" If reused — intent = reuse-org.
+
+**If the SE's intent is ambiguous despite the menu** (e.g., they typed free-text instead of picking one): ask a single follow-up to disambiguate, then proceed.
 
 ### Audit Routing
 

@@ -6,7 +6,7 @@ deployment-summary-*.md
 deployment-log.md
 ROADMAP.md
 setup-guide.md
-sources/
+temp/
 
 # Salesforce-specific, per-org artefacts
 sfdx-project.json
