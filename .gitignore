@@ -17,6 +17,7 @@ force-app/
 .mcp.json
 layouts-audit/
 unpackaged/
+force-app/
 
 # macOS
 .DS_Store

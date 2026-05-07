@@ -75,7 +75,7 @@ Run `test -f .claude/.update-available` to branch. The two variants below are th
 > - {{bullet 2}}
 > - {{bullet 3}}
 >
-> To update: run `bash update.sh` in Terminal (your org data is preserved). VS Code will close — reopen after.
+> To update: run `bash update.sh` in Terminal (CMD+J). A new external Terminal window will open to continue the update process; close VS Code (CMD+Q) before proceeding there.
 > To proceed without updating: reply `proceed` (dismissed for this session only).
 >
 > Confirm you're on Opus, and tell me update vs. proceed. (yes)"

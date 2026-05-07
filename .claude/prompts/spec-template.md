@@ -110,10 +110,15 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 - **Field names are describe-confirmed.** Sparring Stage 6b runs `sf sobject describe` on every Data Seeding target object before writing this spec. Field names, RecordType DeveloperNames, and picklist-vs-string distinctions in this section are empirically verified, not inferred.
 - **Calibration directives (when seed values depend on live org data):** if a seed value must be computed against live aggregates (e.g. "quota set to 70-80% of running user's open pipeline" so the "at risk" narrative reads), write it as a `Calibration:` line under the relevant seed bullet. Format: `Calibration: <target ratio/range in plain English> — reference query: <one-line SOQL>`. Phase 1 runs the query, computes the seed value, and auto-applies — overriding any literal number in this section. The calibration and the computed value land in the change log. If the reference query errors or returns no data, Phase 1 falls back to the literal and records the fallback in `issues`.
 
-### Page Layouts
+### Page Layouts (Classic — field additions only)
+Scope: adding fields to a classic Page Layout that's still the active layout for the object/RecordType. Field positioning within the layout is SE Manual (App Builder / Page Layout editor); Scout deploys the field-presence change only.
 - [Object] — [RecordType] — Active layout: [layout name from audit ★]
 - Fields to add: [list]
 - ⚠️ Visual arrangement: SE Manual Checklist
+
+### Lightning Record Pages (SE Manual — App Builder)
+Scout cannot deploy component placement on Lightning record pages; this section is reference for your App Builder work — list components the SE should add, with the page they belong on. Scout deploys the underlying metadata (LWC bundles, Path component metadata, QuickActions); the SE drags and drops in App Builder.
+- [Object] — [Page name] — Components to add: [list]
 
 ### Lightning App / Tabs
 - Existing app: [name] — modifications: [list]

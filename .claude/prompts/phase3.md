@@ -24,10 +24,12 @@ Scope: single agent, subagent-based routing with Apex or Flow backing actions.
 3. Run `run_code_analyzer` on Apex backing actions (if MCP available).
 4. Validate via `sf agent validate authoring-bundle` before publishing.
 5. Preview with `sf agent preview` before publishing.
-6. Publish, then activate.
-7. Rollback:
-   - `sf project delete source --metadata AiAuthoringBundle:[AgentName] --target-org [alias]`
-   - `sf project delete source --metadata ApexClass:[ClassName] --target-org [alias]`
+6. Publish via `sf agent publish authoring-bundle --api-name [AgentName] --target-org [alias]`. **If publish fails with any error indicating the authoring bundle is not present / not supported / not found** (e.g. `AABNotFound`, "authoring bundle not found", "AiAuthoringBundle is not supported in this org" — do not pattern-match the exact code, the Agentforce surface evolves monthly), fall back to the **GenAiPlannerBundle metadata path**: retrieve the existing planner via `retrieve_metadata` with type `GenAiPlannerBundle:[AgentName]`, edit the XML to apply the spec changes, deploy via `sf project deploy start --metadata GenAiPlannerBundle:[AgentName] --target-org [alias]`. Record the fallback in `discovery_notes` verbatim — include the publish error string so future deploys learn the current trigger surface. Do NOT count the fallback as a second attempt against the two-attempt rule; it is a documented alternate path, not a retry of the same path.
+7. Activate.
+8. Rollback:
+   - If published via authoring bundle: `sf project delete source --metadata AiAuthoringBundle:[AgentName] --target-org [alias]`
+   - If published via planner bundle: `sf project delete source --metadata GenAiPlannerBundle:[AgentName] --target-org [alias]`
+   - Plus: `sf project delete source --metadata ApexClass:[ClassName] --target-org [alias]`
 
 ### Modify Existing Agent (version-safe path)
 For agents already in the org. Every publish creates a new version; rollback via `sf agent activate --version-number N`.
@@ -53,15 +55,24 @@ A failed smoke test does NOT block deployment. Record failures in `issues`.
 ### Standard Agentforce Runtime Permset (after activate)
 After the agent is active, assign the correct standard Agentforce runtime permset to the running user (not the Einstein Agent User — that one is auto-provisioned by the `sf agent` CLI).
 
-1. Probe the org for which standard runtime permset exists — Salesforce naming varies by edition:
+1. Probe the org for which standard runtime permsets exist AND the running user's license — Salesforce permset naming varies by edition, and license compatibility constrains which permsets can actually be assigned:
    ```sql
    SELECT Name FROM PermissionSet WHERE Name IN ('AgentforceEmployeeAgentUser','AgentforceServiceAgentUser','AgentforceUser')
    ```
-2. Preference order (pick the first that exists in the org):
+   ```sql
+   SELECT Profile.UserLicense.Name FROM User WHERE Username = '{{ORG_USERNAME}}'
+   ```
+   Record the running user's license in `discovery_notes` verbatim (e.g. `"Running user license: Salesforce — relevant to Agentforce runtime permset compatibility."`).
+
+2. Preference order — by deployed agent type, narrowed to permsets that exist in the org:
    - If the deployed agent's type is `AgentforceEmployeeAgent` → prefer `AgentforceEmployeeAgentUser`, else `AgentforceServiceAgentUser`, else `AgentforceUser`.
    - If the deployed agent's type is `AgentforceServiceAgent` → prefer `AgentforceServiceAgentUser`, else `AgentforceUser`, else `AgentforceEmployeeAgentUser`.
-3. Assign the selected permset to the **running user** (the SE's demo user, resolved from `{{ORG_USERNAME}}`) via MCP `assign_permission_set`. Record the result in `deployed.standard_permset_assignment`.
-4. If none of the three permsets exist in the org, record in `discovery_notes` verbatim: `"No standard Agentforce runtime permset found in org — SE must confirm which permset their edition uses and assign manually."` Set `deployed.standard_permset_assignment.status = "NOT_FOUND"`. Do NOT broaden the probe to `LIKE 'Agentforce%'` — some Agentforce permsets (e.g. Agentforce Sales Coach) are agent-user-only and explicitly must not be assigned to regular users per Salesforce documentation.
+
+3. Attempt assignment of the preferred permset to the **running user** (resolved from `{{ORG_USERNAME}}`) via MCP `assign_permission_set`. **Reactive license-compat fall-through:** if the assignment fails with a license-compatibility error (e.g. license-mismatch, `INSUFFICIENT_ACCESS_OR_READONLY`, "permission set requires a different user license"), record the failure in `discovery_notes` verbatim with the error string, then attempt the next permset in the preference order. Do NOT pre-filter by license name — empirical mappings across Salesforce / Salesforce Platform / Salesforce Integration licenses are not stable enough to codify; today's evidence is one data point (Salesforce-licensed admin × `AgentforceServiceAgentUser` → fails). Record each fall-through in `discovery_notes`, not `issues` — license incompatibility is a carry-forward design constraint, not a this-session-only break.
+
+4. Record the final assignment outcome in `deployed.standard_permset_assignment` (the permset that succeeded, or the last one tried with status `FAILED` if all three license-mismatched).
+
+5. If none of the three permsets exist in the org at all (probe step 1 returned 0 rows), record in `discovery_notes` verbatim: `"No standard Agentforce runtime permset found in org — SE must confirm which permset their edition uses and assign manually."` Set `deployed.standard_permset_assignment.status = "NOT_FOUND"`. Do NOT broaden the probe to `LIKE 'Agentforce%'` — some Agentforce permsets (e.g. Agentforce Sales Coach) are agent-user-only and explicitly must not be assigned to regular users per Salesforce documentation.
 
 This permset is separate from the spec's Companion permset — the Companion covers custom objects/fields/FLS; this one grants access to the Agentforce runtime.
 

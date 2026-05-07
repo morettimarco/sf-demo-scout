@@ -44,12 +44,12 @@ Reference guides: skim `.claude/skills/sf-flow/references/xml-gotchas.md` before
 2. Use the matching template from the asset list above as the starting point. Record-triggered-after-save is inlined below because it carries the `processMetadataValues` deployment-blocker rule and the Record Update pattern — both load-bearing beyond what the asset file covers.
 3. Deploy as Draft first (`<status>Draft</status>`), confirm success.
 4. **Validation — happy-path FlowTest is mandatory for every autonomous flow type.** Generate a happy-path FlowTest XML (template below — save as `[FlowApiName]_Test.flowTest-meta.xml`), deploy it alongside the flow, then run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`. Pass → activate. Fail twice → skip activation, record in `issues`. FlowTest supports every flow type via MDAPI even though Flow Builder's auto-test UI is limited to record-triggered + data-cloud-triggered (Salesforce docs, 2026-04-30). Type-specific test adaptations:
-   - **Record-triggered:** `<parameters>` supplies `$Record` via `triggeringRecordInitialValues`.
+   - **Record-triggered (before-save, after-save, before-delete):** Single `<testPoints>` block with `<elementApiName>Start</elementApiName>`. `<parameters>` blocks use `<type>InputTriggeringRecordInitial</type>` (no `<leftValueReference>` — the parameter `<name>` is the field API name on the trigger object, the `<value>` is the seeded value). `$Record` is built from these parameters at the Start node.
    - **Before-delete:** test asserts the pre-delete state; delete is the triggering event, assertion checks flow ran without fault.
-   - **Screen flow:** one `<parameters>` block per required input variable.
-   - **Autolaunched / subflow:** `<parameters>` supplies invocation inputs via flow variables.
+   - **Screen flow:** one `<parameters>` block per required input variable, `<type>Input</type>`, `<leftValueReference>` set to the variable's API name.
+   - **Autolaunched / subflow:** `<parameters>` supplies invocation inputs via flow variables — `<type>Input</type>`, `<leftValueReference>` is the variable API name.
    - **Scheduled:** test exercises the flow body on-demand, ignoring the schedule trigger. Schedule itself is a config read-back (`retrieve_metadata` on the deployed flow confirms `<schedule>` fields match the spec).
-   - **Platform-event-triggered:** `<parameters>` supplies a mock event payload (one `<parameters>` block per event field referenced by the flow).
+   - **Platform-event-triggered:** `<parameters>` supplies a mock event payload — `<type>InputTriggeringRecordInitial</type>`, one block per event field referenced by the flow, `<name>` = event field API name.
 5. **Screen flows with QuickAction wiring** (spec requests it): deploy a `QuickAction` (actionType=Flow) pointing at the flow's API name; retrieve the target object's active Layout, add the QuickAction under `<quickActionListItems>`, redeploy the layout.
 6. **Scheduled flow pre-flight:** confirm the spec's Scheduled Flow section names `<startDate>`, `<startTime>`, and `<frequency>` (Once / Daily / Weekly / Monthly / Yearly / Hourly / Weekdays — per FlowSchedule subtype, Salesforce docs API v66.0+). If missing, skip with reason "scheduled flow missing schedule fields — SE must add to spec."
 7. **Platform-event flow pre-flight:** confirm the `<eventType>` object exists via `retrieve_metadata` (CustomObject with `__e` suffix, or standard event like `AIPredictionEvent`). If missing and not in-scope for this deploy, skip with reason "platform event object not in org — SE must create or import first."
@@ -171,7 +171,10 @@ Key rules for updating the triggering record:
 
 Screen flow template lives at `.claude/skills/sf-flow/assets/screen-flow-template.xml` (full clone guarantees presence). Before authoring a screen flow, skim `.claude/skills/sf-flow/references/xml-gotchas.md` — it carries the root-level alphabetical ordering rule and the `storeOutputAutomatically` data-leak rule among other traps. (Already referenced at the top of Flow Rules, restated here because screen flows are where these two specifically bite.)
 
-**FlowTest template** (applies to every autonomous flow type — type-specific adaptations in step 4 above). Save as `[FlowApiName]_Test.flowTest-meta.xml`, deploy alongside the flow, then run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`:
+**FlowTest template** (applies to every autonomous flow type — type-specific parameter shape in step 4 above). Save as `[FlowApiName]_Test.flowTest-meta.xml`, deploy alongside the flow, then run `sf flow run test --class-names [FlowApiName]_Test --target-org [alias] --json`. The example below is **record-triggered**; switch the `<parameters>` block per step 4 for other flow types.
+
+**CRITICAL — FlowTest does NOT accept `<apiVersion>` (unlike Flow). Do not add it.** The Start node is the mandatory entry test point for record-triggered flows — `<elementApiName>Start</elementApiName>`, not the name of an assignment / create / update element. Additional assertions on downstream elements go in **additional** `<testPoints>` blocks; the Start block must exist regardless.
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <FlowTest xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -179,6 +182,17 @@ Screen flow template lives at `.claude/skills/sf-flow/assets/screen-flow-templat
     <flowApiName>[FlowApiName]</flowApiName>
     <label>[FlowApiName] Happy Path</label>
     <testPoints>
+        <elementApiName>Start</elementApiName>
+        <parameters>
+            <name>FieldApiName__c</name>
+            <type>InputTriggeringRecordInitial</type>
+            <value><stringValue>SeedValue</stringValue></value>
+        </parameters>
+        <parameters>
+            <name>Subject</name>
+            <type>InputTriggeringRecordInitial</type>
+            <value><stringValue>Seed Subject</stringValue></value>
+        </parameters>
         <assertions>
             <conditionLogic>and</conditionLogic>
             <conditions>
@@ -188,18 +202,10 @@ Screen flow template lives at `.claude/skills/sf-flow/assets/screen-flow-templat
             </conditions>
             <errorMessage>Flow produced a fault on the happy path</errorMessage>
         </assertions>
-        <elementApiName>Create_Record</elementApiName>
-        <parameters>
-            <leftValueReference>var_RecordName</leftValueReference>
-            <type>Input</type>
-            <value><stringValue>Test Record</stringValue></value>
-        </parameters>
-        <testPointName>AfterCreate</testPointName>
-        <type>FinalOutput</type>
     </testPoints>
 </FlowTest>
 ```
-Adapt: `flowApiName` is the flow under test. One `<parameters>` block per required input variable, with a value that satisfies all validation rules. Assertion checks `$Flow.FaultMessage IS NULL` — passes if the flow runs to completion without a fault. For recordCreates/recordUpdates, add a second assertion on the created record's key field if the test should also validate DML outcome.
+Adapt: `flowApiName` is the flow under test. For record-triggered flows, one `<parameters>` block per field on the trigger object that the flow reads or asserts on; `<name>` is the field API name (no `<leftValueReference>` — the parameter seeds `$Record` directly). For screen / autolaunched / subflow / platform-event flows, use the parameter shape from step 4. Assertion checks `$Flow.FaultMessage IS NULL` — passes if the flow runs to completion without a fault. For recordCreates/recordUpdates, add a second `<testPoints>` block with `<elementApiName>` set to the create/update element name and an assertion on the resulting record's key field.
 <!-- /IF:FLOWS -->
 
 <!-- IF:APEX -->
