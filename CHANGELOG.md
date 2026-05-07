@@ -7,6 +7,7 @@ Check your last `update.sh` date against the headers below to see what you misse
 - **Sparring now has three explicit paths.** Stage 2 presents `A new demo scenario` / `Iterating on an existing demo` / `Showtime` as a menu instead of an open "what brings you in today?" — discoverable, equal-altitude, no hidden classifier logic.
 - **Showtime: live customer conversation sparring.** Paste a 15-minute customer transcript, get 2 scenarios proposed against a pre-vetted happy-path shortlist, sharpen one in a single round, get a spec. No multi-stage discovery, no spine-acknowledgement gate, no cut gate. The value spine survives — auto-drafted from your transcript, emitted inline with each scenario card. Designed for the 90-minute "build alongside the customer" engagement format. Pilot at World Tour Frankfurt.
 - **Happy-path shortlist as the moat.** Showtime can only propose patterns Scout has run end-to-end ≥3× cleanly — currently 3 Tier 1 (record-triggered flow + email draft, Account hierarchy + KOL fields, cross-cloud activity timeline) and 1 Tier 2 (single Agentforce agent, no Data Cloud dependency). Off-list edits route the SE to full sparring. The list grows via /project-sparring as more deployment data accumulates.
+- **Spring cleaning after Showtime.** Tightened the always-loaded instructions and removed some duplicated boilerplate across commands. No behaviour change — Scout just carries less weight per session.
 
 ## 2026-05-06
 

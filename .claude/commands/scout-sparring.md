@@ -19,6 +19,8 @@ Push back hard during sparring — this is where the quality of the demo is deci
 
 **Brevity rule:** Keep responses to 4-6 sentences unless the SE asks for detail or the stage requires structured output (discovery summary, scenario proposal, spec). Lead with the judgment, skip the preamble.
 
+**Note on the skills menu:** you may see `scout-sparring` listed as a skill. Ignore it — the harness auto-indexes slash commands for discoverability, but there is no `.claude/skills/scout-sparring/SKILL.md` by design. Your instructions are this file. Do not go looking for a SKILL.md.
+
 ## Before You Start
 
 Read `orgs/sparring-lessons.md` — these are mistakes from previous sparring sessions. Do not repeat them.

@@ -8,27 +8,11 @@
 - Type: Personal demo org — destructive operations permitted with prior explanation
 
 ## MCP Tools
-Salesforce DX MCP Server configured in .mcp.json. Prefer MCP over CLI:
-- `retrieve_metadata` — inspect org state
-- `deploy_metadata` — push changes
-- `run_soql_query` — data verification
-- `assign_permission_set` — assign permission sets
-- `list_all_orgs` — verify org connections
-- `run_code_analyzer` — quality gate for Apex/LWC
-- LWC expert tools — scaffolding, SLDS, validation (complemented by the `sf-lwc` skill for PICKLES methodology and 165-point scoring)
+Three MCP servers are configured in `.mcp.json` (Salesforce DX + Salesforce Docs) and `~/.claude.json` (Slack, user-scope). Prefer MCP over `sf` CLI; fall back to CLI if MCP is unavailable.
 
-Salesforce Docs MCP Server (also in .mcp.json) for official documentation lookup:
-- `salesforce_docs_search` — semantic search across Salesforce doc collections; returns ranked excerpts with source URLs
-- `salesforce_docs_fetch` — retrieve a full doc page by `documentPath`
-Use during sparring to verify release-gated features before speccing, and during deployment to diagnose unfamiliar error messages. Optional — if the endpoint is unavailable, Scout degrades gracefully.
-
-Slack MCP Server (user-scope, registered by install.sh) for SE-named canvas/channel lookups during sparring and handover-canvas writes after deployment:
-- `slack_search_public_and_private`, `slack_search_channels` — resolve canvas titles and channel names the SE mentions
-- `slack_read_canvas`, `slack_read_channel` — pull content for scenario context
-- `slack_create_canvas` — write the demo handover brief to the SE's personal Slack (scout-building Step 8c)
-Used in scout-sparring Stage 4 (inline ask, New/Reuse-org only) and scout-building Step 8c (y/n handover canvas offer). Hard-degrades to "not available" if not authenticated. OAuth token lives in macOS Keychain (`Claude Code-credentials`); MCP registration in `~/.claude.json` — both survive `update.sh`.
-
-Fall back to `sf` CLI if MCP is unavailable.
+- **Salesforce DX** — metadata retrieve/deploy, SOQL, permset assignment, org listing, `run_code_analyzer`, and LWC expert tools (complement the `sf-lwc` skill's PICKLES methodology + 165-point scoring).
+- **Salesforce Docs** — `salesforce_docs_search` + `salesforce_docs_fetch` for release-gated features and unfamiliar deploy errors. Decision tree in `demo-docs-consultation`. Degrades gracefully if unavailable.
+- **Slack** — canvas + channel lookups during sparring (Stage 4, opt-in) and handover canvas writes after deployment (scout-building 8c). Hard-degrades when unauthenticated.
 
 ## Build Boundaries
 
@@ -78,10 +62,8 @@ Fall back to `sf` CLI if MCP is unavailable.
    ("8 counts, then 10 layouts, then 3 deploys") so the SE can track progress.
 2. Retrieve current state before writing — prefer MCP retrieve_metadata
 3. Deploy in small increments — never batch unrelated changes
-4. After each deploy: confirm success via deploy status or MCP feedback
-5. On failure: explain error in plain English, fix only the failing element, redeploy
-6. After every deployment: run the Companion Permission Set (see below)
-7. If context is getting long, save progress to the change log and tell the SE to start a fresh session
+4. After every deployment: run the Companion Permission Set (see below)
+5. If context is getting long, save progress to the change log and tell the SE to start a fresh session
 
 ## Companion Permission Set — MANDATORY
 After every deployment creating objects, fields, record types, tabs, or apps:

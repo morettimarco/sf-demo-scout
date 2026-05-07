@@ -40,14 +40,7 @@ Run a single MCP probe to confirm connectivity:
 
 ## Step 2: Model Gate
 
-Output as a standalone message:
-
-> "⚠️ **This command is designed for Opus.**
-> Run `/model opus` now if you haven't already — your conversation history is preserved.
->
-> Confirm you're on Opus before we continue. (yes)"
-
-**Wait for the SE's confirmation before proceeding.**
+Read `.claude/prompts/model-gate-opus.md` and emit the gate. Wait for the SE's confirmation before proceeding.
 
 ---
 
