@@ -7,13 +7,23 @@ Loaded on demand when intent = iteration. Returns to the main command for Stage 
 Review the most recent audit, prior specs, and change logs for this org. Understand what's already built before asking anything.
 
 Ask these three questions in a single message:
-1. **What are you adding or changing?** Be specific — "add an Agentforce agent for case triage," not "improve the demo."
-2. **Why now?** Customer feedback, new stakeholder, demo gap, competitive pressure — what's driving this?
+1. **What are you changing — adding, refining, or fixing something that's broken?** Be specific — "add an Agentforce agent for case triage," "tighten the discovery flow's exit criteria," or "the agent's flow action errors on preview, fix it." Name the artifact and the change.
+2. **Why now?** Customer feedback, new stakeholder, demo gap, competitive pressure, post-deploy bug — what's driving this?
 3. **Which part of the existing demo does this connect to?** Where in the demo flow does this appear?
 
 **Stop and wait for answers.**
 
 If the SE's answers are vague ("just add an agent" / "because I want one" / "it's standalone"), push back: "Which customer moment does this serve? If you can't name the moment, it'll feel bolted-on in the demo."
+
+### Symptom Follow-up (fix intent only)
+
+If Q1 named a symptom — error message, broken preview, failed deployment, runtime exception — ask one targeted follow-up before the Delta Conflict Check:
+
+> "To research the right way: paste the **exact error text** (copy from the UI / debug log), and tell me **when it fires** (preview, runtime, deploy, on a specific user action). If the error code is generic, the reproduction step is what makes it tractable."
+
+Capture the verbatim error and trigger context. Carry both into Stage 5 — when platform-research runs, it MUST issue at least one Docs MCP search keyed on the verbatim error code or message text, in addition to the standard object/capability research.
+
+No symptom in Q1 → skip the follow-up, proceed directly to Delta Conflict Check.
 
 ### Delta Conflict Check
 

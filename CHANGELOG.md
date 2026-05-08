@@ -2,6 +2,10 @@
 
 Check your last `update.sh` date against the headers below to see what you missed.
 
+## 2026-05-08
+
+- **Iteration sparring now handles "fix this broken thing" intent.** Paste the error text and reproduction step; Scout researches it against Salesforce docs and proposes a remediation spec. Driven by SE feedback after a post-deploy Agentforce preview error that didn't pattern-match the additive iteration path.
+
 ## 2026-05-07
 
 - **Sparring now has three explicit paths.** Stage 2 presents `A new demo scenario` / `Iterating on an existing demo` / `Showtime` as a menu instead of an open "what brings you in today?" — discoverable, equal-altitude, no hidden classifier logic.

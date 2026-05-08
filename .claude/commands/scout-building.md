@@ -197,23 +197,7 @@ The change log must include:
 
 ### 8b: Propose Lessons
 
-Review the session for:
-- Two-attempt failures reported by sub-agents (what failed and why)
-- Sub-agent output validation failures — especially schema-drift-with-successful-deployment (the sub-agent emitted the wrong envelope but the org probe passed). Candidate lesson: the drift vector itself (what the sub-agent emitted vs what the schema required), so the next author can tighten the prompt.
-- Unexpected conflict check findings from Step 6
-- SE corrections during gated confirmations
-- Permission set or layout issues reported by sub-agents
-- Phase 2 AND Phase 3 `discovery_notes` entries — if any describe a new platform restriction, validate/publish/activate-time workaround, or standard-action-to-Apex fallback, propose adding it to `orgs/building-lessons.md` with the exact error message or symptom as a diagnostic pattern. Phase 3 publish-time fixes (nested-if syntax, license-restricted permissions, CLI prefix requirements) are high-value lessons — they recur across every Agentforce deployment.
-- `actions_unverified_in_preview` entries — if a new category appears (e.g. a new stateless-preview gap not seen before), propose a lesson so future Phase 3 prompts can pre-emptively warn.
-
-If any occurred, propose 1-3 candidate lessons:
-
-> "A few things worth remembering for next time:
-> 1. [lesson]
-> 2. [lesson]
-> Add these to lessons? (yes / edit / skip)"
-
-If approved, read `.claude/prompts/lessons-maintenance.md` and follow the Append Format section to append each lesson to `orgs/building-lessons.md`, then follow the Trim & Share procedure in the same file if triggered. If the deployment was clean, skip silently.
+Read `.claude/prompts/lessons-maintenance.md` and execute the "Propose Lessons (building)" section.
 
 ### 8c: Demo Handover Brief
 

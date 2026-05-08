@@ -101,7 +101,7 @@ Output as a single message, then wait for the SE's reply:
 >
 > I can help you with:
 > - **A new demo scenario** — full sparring for a new customer situation, typically on a fresh demo org
-> - **Iterating on an existing demo** — extend or refine work in progress, whether you built it yourself or with Scout
+> - **Iterating on an existing demo** — extend or troubleshoot work in progress, whether you built it yourself or with Scout
 > - **Showtime** — live customer conversation, transcript-driven, condensed flow
 >
 > What shall it be, and for what customer?"
@@ -199,6 +199,8 @@ Read `.claude/prompts/sparring/platform-research.md` and execute the procedure. 
 - Executing searches against Salesforce Docs MCP
 - Surfacing findings for SE review
 
+**Symptom-driven iterations (Stage 4i captured a verbatim error):** in addition to the standard procedure, issue at least one `salesforce_docs_search` keyed on the error code or error message text. Surface findings as candidate root-cause families in the Stage 6i proposal — not as asserted fix.
+
 After the procedure completes and the SE confirms the findings, proceed per the route table in Stage 3. For iterations, read `.claude/prompts/sparring/iteration.md` and execute Stage 6i.
 
 ---
@@ -265,25 +267,9 @@ Populate the **Release Notes & Citations** section with every consultation from 
 
 ### Propose Lessons
 
-Before telling the SE the spec is ready, review the session for moments where:
-- The SE corrected a wrong assumption
-- An existing-first evaluation caught unnecessary new metadata
-- A gate question revealed a gap in reasoning
-- The audit surfaced something unexpected
-- A docs consultation contradicted or sharpened the scope
-
-If any occurred, propose 1-3 candidate lessons:
-
-> "Before we wrap up — I'd suggest adding these to our lessons file:
-> 1. [lesson]
-> 2. [lesson]
-> Want me to add these, edit them, or skip?"
-
-If the SE approves, read `.claude/prompts/lessons-maintenance.md` and follow the Append Format section to append each lesson to `orgs/sparring-lessons.md`, then follow the Trim & Share procedure in the same file if triggered. If nothing noteworthy, skip silently.
+Read `.claude/prompts/lessons-maintenance.md` and execute the "Propose Lessons (sparring)" section.
 
 ### Done
-
-**Do not send this until lessons are resolved (or skipped):**
 
 > "Spec saved.
 >
