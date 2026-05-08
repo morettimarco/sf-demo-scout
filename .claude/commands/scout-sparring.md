@@ -6,7 +6,7 @@ description: >
   Produces a structured spec for /scout-building to deploy.
   Activate with /scout-sparring.
 model: opus
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, mcp__Salesforce_DX__retrieve_metadata, mcp__Salesforce_DX__run_soql_query, mcp__Salesforce_DX__list_all_orgs, mcp__Salesforce_Docs__salesforce_docs_search, mcp__Salesforce_Docs__salesforce_docs_fetch, mcp__slack__slack_search_channels, mcp__slack__slack_search_public_and_private, mcp__slack__slack_read_channel, mcp__slack__slack_read_canvas
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, mcp__Salesforce_DX__retrieve_metadata, mcp__Salesforce_DX__run_soql_query, mcp__Salesforce_DX__list_all_orgs, mcp__Salesforce_Docs__salesforce_docs_search, mcp__Salesforce_Docs__salesforce_docs_fetch, mcp__slack__slack_search_channels, mcp__slack__slack_search_public_and_private, mcp__slack__slack_read_channel, mcp__slack__slack_read_canvas, mcp__slack__slack_create_canvas
 ---
 
 # Scout Sparring — Demo Discovery & Spec Generation
@@ -102,7 +102,7 @@ Output as a single message, then wait for the SE's reply:
 > I can help you with:
 > - **A new demo scenario** — full sparring for a new customer situation, typically on a fresh demo org
 > - **Iterating on an existing demo** — extend or troubleshoot work in progress, whether you built it yourself or with Scout
-> - **Showtime** — live customer conversation, transcript-driven, condensed flow
+> - **Showtime** — live customer conversation, transcript-driven, condensed flow. Runs a fresh audit each session (~5–10min) — fire it up when the customer sits down; the audit runs in parallel with your opening discovery, so by the time you have a transcript ready, Scout is ready to propose.
 >
 > What shall it be, and for what customer?"
 
