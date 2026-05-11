@@ -185,4 +185,20 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 
 ### Open Questions for Next Session
 - [Unresolved, feedback, improvements]
+
+## Acceptance Criteria
+
+Each criterion defines one assertable demo story step. /scout-testing runs all criteria
+in the ralph loop: Tester agent → Fixer agent on failure → repeat (max 3 iterations).
+
+**Seed script:** `orgs/[alias]-[customer]/seed-[customer]-demo.sh`
+(The Tester agent runs this before every iteration to reset the org to a clean demo state.
+Leave blank if no seed script was produced by /scout-building.)
+
+### AC-1: [short name]
+- **Test type:** `agent_utterance` | `soql_check` | `apex_test`
+- **Test:** [for agent_utterance: the exact utterance string | for soql_check: the SOQL query | for apex_test: Apex class name]
+- **Assert:** [what to check — SOQL for agent_utterance side effects, expected row count/field values for soql_check, pass% for apex_test]
+- **Expected response:** [for agent_utterance: keywords or pattern the agent response must contain]
+- **Failure hint:** [which component to look at — Apex class, flow, agent topic, field API name]
 ```

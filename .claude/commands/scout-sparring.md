@@ -217,7 +217,26 @@ Both halves must be resolved before proceeding to Stage 6b.
 
 ## Stage 6b: Data Shape Validation
 
-Read `.claude/prompts/sparring-data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 7 after — stopping for SE input only if problems require a design change.
+Read `.claude/prompts/sparring-data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 6c after — stopping for SE input only if problems require a design change.
+
+---
+
+## Stage 6c: Acceptance Criteria Authoring
+
+After Stage 6b completes, author the Acceptance Criteria for the ralph loop:
+
+1. Review the final scenario, data shape findings, and all deployed components planned.
+2. Check if the spec includes a Data Seeding section with a seed script. If yes, record its expected path (`orgs/[alias]-[customer]/seed-[customer]-demo.sh`) — the Tester will run this before every test iteration to reset the org to a clean demo state.
+3. Draft 4–8 ACs covering the critical demo story steps. Coverage targets:
+   - At least 1 `agent_utterance` AC for each Agentforce subagent in scope (if agent present) — use the "money shot" utterance that starts the demo
+   - At least 1 `soql_check` AC per critical field or record the demo story depends on — side-effect records created by agent/flows, routing fields, DG closer fields
+   - At least 1 `apex_test` AC if Apex was deployed
+4. Present them to the SE:
+   > "Here are the acceptance criteria for the ralph loop — /scout-testing will run these after building to confirm the demo works end-to-end:
+   > [numbered AC list in AC format]
+   > Add, remove, or tweak any of these before I write the spec?"
+5. Wait for SE reply. Apply edits or proceed if SE approves.
+6. Write approved ACs into the spec under `## Acceptance Criteria` (including the **Seed script** line if a seed script is expected).
 
 ---
 
