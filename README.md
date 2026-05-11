@@ -42,14 +42,15 @@ Or just re-run the bootstrap one-liner — it routes to `update.sh` automaticall
 
 ## How It Works
 
-Two commands. That's the whole workflow.
+Three commands. That's the whole workflow.
 
 | Step | Command | What happens |
 |------|---------|--------------|
-| **Spar** | `/scout-sparring` | You share customer context. Opus audits the org, researches platform capabilities, asks smart questions, and produces a structured demo spec. |
+| **Spar** | `/scout-sparring` | You share customer context. Opus audits the org, researches platform capabilities, asks smart questions, produces a structured demo spec — and authors **Acceptance Criteria** for the ralph loop. |
 | **Build** | `/scout-building` | Opus reads the spec, orchestrates Sonnet sub-agents across three phases (org config → flows/apex/LWC → Agentforce), and writes a change log. |
+| **Test** | `/scout-testing` | Runs the **ralph loop**: Tester agent verifies each Acceptance Criterion against the live org; Fixer agent patches failures; loops up to 3 times. Delivers a pass/fail test report. |
 
-Always spar first. Always build second. It's like discovery → demo, but for configuring the demo itself. Very meta. 🤯
+Spar → Build → Test. Like TDD, but for configuring the demo itself. Very meta. 🤯
 
 ### Supporting Cast
 
@@ -66,10 +67,10 @@ Always spar first. Always build second. It's like discovery → demo, but for co
 Custom objects, fields, picklist values, record types, queues, permission sets, page layout field additions, Lightning apps & tabs, and demo data seeding. Scout does these in its sleep. If it had sleep.
 
 ### One-time SE confirmation per category
-Record-triggered Flows, simple screen flows (≤3 linear screens, up to 5 with justification), simple Apex, simple LWC, and Agentforce agents (with smoke testing!). Confirm once, Scout handles the rest.
+Record-triggered, autolaunched, subflow, scheduled, and platform-event-triggered Flows; screen flows (≤3 linear screens, up to 5 with justification); simple Apex; simple LWC; and Agentforce agents (with smoke testing!). Confirm once, Scout handles the rest.
 
 ### Still on your plate (for now 😉)
-Complex screen flows (branching, subflows, File Upload, Data Table, custom LWC screen components), scheduled flows, multi-object flows, complex Apex/LWC, multi-agent orchestration, page layout visual arrangement, reports, dashboards, OmniStudio. Scout adds these to a Manual Checklist so you don't forget.
+Orchestration flows, complex screen flows (branching, File Upload, Data Table, custom LWC screen components), complex Apex/LWC, multi-agent orchestration, page layout visual arrangement, reports, dashboards, OmniStudio. Scout adds these to a Manual Checklist so you don't forget.
 
 ---
 
@@ -80,8 +81,9 @@ After every run, Scout saves artifacts in `orgs/[alias]-[customer]/`:
 | File | What's inside |
 |------|---------------|
 | `audit-*.md` | Org snapshot – objects, flows, agents, layouts, gaps |
-| `demo-spec-*.md` | The deployment spec (your source of truth) |
+| `demo-spec-*.md` | The deployment spec and Acceptance Criteria (your source of truth) |
 | `changes-*.md` | What got deployed, what to verify, what's on you |
+| `test-report-*.md` | Ralph loop results – PASS/FAIL per criterion, fixes applied, final verdict |
 
 These survive updates. They're *your* data – Scout just writes them.
 
@@ -125,9 +127,10 @@ CLAUDE.md                       ← Root instructions (under 100 lines – we co
 install.sh                      ← Full setup (idempotent, run it twice if you want)
 update.sh                       ← Nuke-and-reinstall updater
 .claude/
-  commands/                     ← 6 slash commands (SE-facing + internal pipeline ops)
+  commands/                     ← 7 slash commands (sparring, building, testing, setup, switch-org)
   skills/                       ← 3 demo skills (+ 16 community skills after install)
-  prompts/                      ← 20 sub-agent templates, lessons & reference docs
+  prompts/                      ← 22 sub-agent templates, lessons & reference docs
+                                    (includes testing-acceptance.md + fixing-failures.md)
   scripts/                      ← sync-skills.sh
   hooks/                        ← session-startup.sh (org check on every launch)
   settings.json                 ← Permissions & hooks config
