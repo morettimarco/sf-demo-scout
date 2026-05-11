@@ -6,7 +6,7 @@ description: >
   Produces a structured spec for /scout-building to deploy.
   Activate with /scout-sparring.
 model: opus
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, mcp__Salesforce_DX__retrieve_metadata, mcp__Salesforce_DX__run_soql_query, mcp__Salesforce_DX__list_all_orgs, mcp__Salesforce_Docs__salesforce_docs_search, mcp__Salesforce_Docs__salesforce_docs_fetch, mcp__slack__slack_search_channels, mcp__slack__slack_search_public_and_private, mcp__slack__slack_read_channel, mcp__slack__slack_read_canvas
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, mcp__Salesforce_DX__retrieve_metadata, mcp__Salesforce_DX__run_soql_query, mcp__Salesforce_DX__list_all_orgs, mcp__Salesforce_Docs__salesforce_docs_search, mcp__Salesforce_Docs__salesforce_docs_fetch, mcp__slack__slack_search_channels, mcp__slack__slack_search_public_and_private, mcp__slack__slack_read_channel, mcp__slack__slack_read_canvas, mcp__slack__slack_create_canvas
 ---
 
 # Scout Sparring — Demo Discovery & Spec Generation
@@ -18,6 +18,8 @@ Direct, critical, intellectually honest. Challenge poor ideas constructively.
 Push back hard during sparring — this is where the quality of the demo is decided.
 
 **Brevity rule:** Keep responses to 4-6 sentences unless the SE asks for detail or the stage requires structured output (discovery summary, scenario proposal, spec). Lead with the judgment, skip the preamble.
+
+**Note on the skills menu:** you may see `scout-sparring` listed as a skill. Ignore it — the harness auto-indexes slash commands for discoverability, but there is no `.claude/skills/scout-sparring/SKILL.md` by design. Your instructions are this file. Do not go looking for a SKILL.md.
 
 ## Before You Start
 
@@ -50,34 +52,37 @@ Run a single MCP probe to confirm connectivity:
   > If this persists, check that .mcp.json exists in the project root."
   Stop. Do not proceed without MCP.
 
-**Check for pending update:** Read `.claude/.update-available`. If it exists, parse `commits_behind=<N>` and `recent_changes=<bullets separated by ` | `>`.
-
 ### Model gate
 
-Emit as a standalone message. Include the bracketed update block only if `.claude/.update-available` exists; omit the block entirely otherwise.
+Run `test -f .claude/.update-available` to branch. The two variants below are the ONLY blocks allowed — do not edit them at runtime, do not mix them, do not inline any conditional markup.
+
+**Variant A — no pending update (flag file absent).** Emit verbatim as a standalone message:
 
 > "Scout Sparring is designed for Opus.
 > Run `/model opus` now if you haven't already — your conversation history is preserved.
 >
-> [--- *include only if update flag exists* ---
+> Confirm you're on Opus. (yes)"
+
+**Variant B — update pending (flag file exists).** Read `.claude/.update-available` and parse `commits_behind=<N>` and `recent_changes=<bullets separated by ` | `>`. Substitute `{{N}}` with `commits_behind`, and emit one `> - {{bullet}}` line per bullet (split on ` | `, up to 3). If `recent_changes` is empty, omit the "Recent changes:" header and its bullet lines; keep everything else.
+
+> "Scout Sparring is designed for Opus.
+> Run `/model opus` now if you haven't already — your conversation history is preserved.
 >
-> ⚠️ **SF Demo Scout update available** ([N] commit(s) behind main)
+> ⚠️ **SF Demo Scout update available** ({{N}} commit(s) behind main)
 >
 > Recent changes:
-> - [bullet 1]
-> - [bullet 2]
-> - [bullet 3]
+> - {{bullet 1}}
+> - {{bullet 2}}
+> - {{bullet 3}}
 >
-> To update: run `bash update.sh` in Terminal (your org data is preserved). VS Code will close — reopen after.
+> To update: run `bash update.sh` in Terminal (CMD+J). A new external Terminal window will open to continue the update process; close VS Code (CMD+Q) before proceeding there.
 > To proceed without updating: reply `proceed` (dismissed for this session only).
 >
-> ---]
->
-> Confirm you're on Opus[, and if an update is pending, tell me update vs. proceed]. (yes)"
+> Confirm you're on Opus, and tell me update vs. proceed. (yes)"
 
-Substitution rules when the flag exists: `[N]` = `commits_behind`; bullets split on ` | ` (use exactly as many as present, up to 3). If `recent_changes` is empty, omit the "Recent changes" lines but keep the dividers. Do not write to or delete the flag file — the next `session-startup.sh` run refreshes it.
+Do not write to or delete the flag file — the next `session-startup.sh` run refreshes it.
 
-**Wait for the SE's confirmation before proceeding to Stage 2.** If the SE chose to update, they will close VS Code — do not advance. If they replied `proceed`, advance normally.
+**Wait for the SE's confirmation before proceeding to Stage 2.** If the SE chose to update, they will close VS Code — do not advance. If they replied `proceed` (Variant B) or `yes` (either variant), advance normally.
 
 ---
 
@@ -85,28 +90,41 @@ Substitution rules when the flag exists: `[N]` = `commits_behind`; bullets split
 
 Run `sf config get target-org --json` and `sf org display --json`. Extract alias and username.
 
+**If `sf org display` fails** (no org connected, or auth expired): emit this as a standalone message and stop.
+
+> "No demo org connected. Run `/switch-org` to connect one, then re-run `/scout-sparring`."
+
+Do not continue to audit routing without an org.
+
 Output as a single message, then wait for the SE's reply:
 > "Active org: [alias] ([username]). Right org, or switch? (run /switch-org)
 >
-> Which customer is this for, and what brings you in today?"
+> I can help you with:
+> - **A new demo scenario** — full sparring for a new customer situation, typically on a fresh demo org
+> - **Iterating on an existing demo** — extend or troubleshoot work in progress, whether you built it yourself or with Scout
+> - **Showtime** — live customer conversation, transcript-driven, condensed flow. Runs a fresh audit each session (~5–10min) — fire it up when the customer sits down; the audit runs in parallel with your opening discovery, so by the time you have a transcript ready, Scout is ready to propose.
+>
+> What shall it be, and for what customer?"
 
-Wait for the SE's reply. Read `.claude/prompts/sparring-customer-normalization.md` and execute the procedure — it normalizes the customer name to a folder-safe slug and prompts the SE on existing-folder matches.
+Wait for the SE's reply. Read `.claude/prompts/sparring/customer-normalization.md` and execute the procedure — it normalizes the customer name to a folder-safe slug and prompts the SE on existing-folder matches.
 
 **Org folder:** `orgs/[alias]-[customer]/`
 
 ---
 
-## Stage 3: Intent Classification & Audit Routing
+## Stage 3: Intent Confirmation & Audit Routing
 
-Based on the SE's response to "what brings you in today?", classify the intent.
+The SE selected one of three paths in Stage 2. Confirm and branch.
 
-**New scenario indicators:** discovery notes, transcripts, new customer, "new demo," "starting fresh," broad scope, multiple capabilities mentioned, no reference to existing work.
+**If the SE selected "Showtime":** read `.claude/prompts/sparring/showtime.md` and execute its procedure end-to-end. It handles audit confirmation, transcript intake, scenario proposal, and spec generation. Do not proceed to Stage 4+ in this command — Showtime returns to the main command only after spec is on disk, then exits cleanly.
 
-**Iteration indicators:** references existing demo, names a specific component to add/change, "add an agent," "update the fields," "iterate," mentions a prior session or existing setup.
+**If the SE selected "A new demo scenario":** intent = new. Continue to Audit Routing below.
 
-**Reuse-org indicators:** different customer than prior work on this org, "reusing," "dragging it out," "set this up for X, now for Y," org was built for a different customer. If suspected but not explicit, ask: "Is this org being reused from a prior customer, or is it fresh?"
+**If the SE selected "Iterating on an existing demo":** intent = iteration. Continue to Audit Routing below.
 
-**If ambiguous between new and iteration:** ask a single follow-up: "Are you building on an existing demo for this customer, or starting a new scenario from scratch?"
+**Reuse-org branch:** if the SE chose "new" but their reply suggests they're reusing an org from a prior customer ("set this up for X, now for Y," "dragging it out"), ask once: "Is this org being reused from a prior customer, or is it fresh?" If reused — intent = reuse-org.
+
+**If the SE's intent is ambiguous despite the menu** (e.g., they typed free-text instead of picking one): ask a single follow-up to disambiguate, then proceed.
 
 ### Audit Routing
 
@@ -114,7 +132,7 @@ Check `orgs/[alias]-[customer]/` for existing audits and change logs.
 
 **Reuse branch (audit exists, <=7 days old, SE confirms no manual changes):** read the audit markdown file directly. Extract the star-flagged items from it.
 
-**Fresh audit branch (stale >7 days or absent):** Read `.claude/prompts/sparring-audit-orchestration.md` and execute the procedure. This delegates bulk metadata retrieval to 3 parallel Sonnet sub-agents, runs spot-checks, and consolidates results. Opus never reads raw metadata payloads.
+**Fresh audit branch (stale >7 days or absent):** Read `.claude/prompts/sparring/audit-orchestration.md` and execute the procedure. This delegates bulk metadata retrieval to 3 parallel Sonnet sub-agents, runs spot-checks, and consolidates results. Opus never reads raw metadata payloads.
 
 **Reuse-org intent always takes the fresh audit branch** — the SE is reusing an org from a prior customer, so the audit must rediscover what's there regardless of age.
 
@@ -129,17 +147,17 @@ After the audit (fresh or reused), surface the star-flagged items:
 
 ### Route
 
-| Intent    | Discovery | Research (5) | Scenario Def | Data Validation (6b) | Spec (7) |
-|-----------|-----------|--------------|--------------|----------------------|----------|
-| New       | Stage 4   | run          | Stage 6      | run                  | run      |
-| Iteration | Stage 4i† | run          | Stage 6i†    | run                  | run      |
-| Reuse-org | Stage 4   | skip¹        | Stage 6      | skip²                | run      |
+| Intent    | Discovery | Research (5) | Scenario Def | Data Validation (6b) | AC Authoring (6c) | Spec (7) |
+|-----------|-----------|--------------|--------------|----------------------|-------------------|----------|
+| New       | Stage 4   | run          | Stage 6      | run                  | run               | run      |
+| Iteration | Stage 4i† | run          | Stage 6i†    | run                  | run               | run      |
+| Reuse-org | Stage 4   | skip¹        | Stage 6      | skip²                | run               | run      |
 
-† Iteration stages are in `.claude/prompts/sparring-iteration.md` — read on demand.
+† Iteration stages are in `.claude/prompts/sparring/iteration.md` — read on demand.
 ¹ Skip Stage 5 unless the scenario introduces new objects beyond what the audit covers OR gated categories (Flows, Apex, LWC, Agentforce).
-² Skip Stage 6b unless the scenario has Apex, Flows, or Agentforce actions (objects queried or written to programmatically) OR a Data Seeding section with explicit field mappings. Data seeding triggers the describe-before-spec path inside sparring-data-shape.md.
+² Skip Stage 6b unless the scenario has Apex, Flows, or Agentforce actions (objects queried or written to programmatically) OR a Data Seeding section with explicit field mappings. Data seeding triggers the describe-before-spec path inside sparring/data-shape.md.
 
-For **iteration intent**: read `.claude/prompts/sparring-iteration.md` and execute Stage 4i, then return here for Stage 5.
+For **iteration intent**: read `.claude/prompts/sparring/iteration.md` and execute Stage 4i, then return here for Stage 5.
 For **new scenario** and **reuse-org**: proceed to Stage 4 below.
 
 ---
@@ -149,9 +167,9 @@ For **new scenario** and **reuse-org**: proceed to Stage 4 below.
 Produce a structured summary: customer profile, key pain points (direct quotes), stakeholders, competitive context, gaps.
 
 Ask max 6 clarifying questions:
-1. Single most compelling pain point
+1. Single most compelling pain point — in the customer's words if you have a direct quote
 2. **Which Salesforce clouds?** If this is an industry cloud (Health Cloud, Life Sciences Cloud, Financial Services Cloud, Manufacturing Cloud, etc.), name it — it determines the data model. If the audit found non-universal standard objects with data, mention them: "The audit found [objects] — this looks like [cloud]. Confirm?"
-3. Customer's definition of success
+3. Customer's definition of success — a concrete outcome or metric they'd point to in 12 months
 4. Which stakeholder's reaction matters most
 5. **Which existing app and objects from the audit should anchor the demo?** Show the star-flagged items and ask the SE to confirm or redirect.
 6. **Any specific Salesforce feature you want to showcase?** (Agentforce, Data Cloud, a specific Flow pattern, a guided screen flow / wizard, an industry-specific capability — or "nothing specific, you decide")
@@ -164,7 +182,7 @@ Ask max 6 clarifying questions:
 
 ### Slack lookup handling
 
-If the SE's reply names one or more canvases or a channel: read `.claude/prompts/sparring-slack-lookup.md` and execute its procedure with the names as inputs. If the SE answers only 1-6 and doesn't mention Slack: move on to Stage 5 without ceremony — do not re-ask.
+If the SE's reply names one or more canvases or a channel: read `.claude/prompts/sparring/slack-lookup.md` and execute its procedure with the names as inputs. If the SE answers only 1-6 and doesn't mention Slack: move on to Stage 5 without ceremony — do not re-ask.
 
 Slack findings feed scenario proposal as **context only** — attributed, never asserted. Canvas content may shape demo storylines directly (its intended use); SE knowledge and Salesforce docs remain authoritative.
 
@@ -174,20 +192,30 @@ Then proceed to Stage 5 (Platform & Data Model Research).
 
 ## Stage 5: Platform & Data Model Research
 
-Read `.claude/prompts/sparring-platform-research.md` and execute the procedure. It handles:
+Read `.claude/prompts/sparring/platform-research.md` and execute the procedure. It handles:
 - Object capability pre-flight (EntityDefinition + QueueSobject queries)
 - Docs follow-up for restricted objects
 - Search topic inference from audit + discovery
 - Executing searches against Salesforce Docs MCP
 - Surfacing findings for SE review
 
-After the procedure completes and the SE confirms the findings, proceed per the route table in Stage 3. For iterations, read `.claude/prompts/sparring-iteration.md` and execute Stage 6i.
+**Symptom-driven iterations (Stage 4i captured a verbatim error):** in addition to the standard procedure, issue at least one `salesforce_docs_search` keyed on the error code or error message text. Surface findings as candidate root-cause families in the Stage 6i proposal — not as asserted fix.
+
+After the procedure completes and the SE confirms the findings, proceed per the route table in Stage 3. For iterations, read `.claude/prompts/sparring/iteration.md` and execute Stage 6i.
 
 ---
 
 ## Stage 6: Full Scenario Definition
 
+### Value Spine (co-emergence)
+
+Read `.claude/prompts/sparring/value-story.md` and execute the Drafting Rules + Output Format. Draft the spine from Stages 2–5 context — do NOT ask the SE for new input. Surface gaps as gaps. Wait for the SE to acknowledge (edit, sharpen, or "move on") before proceeding to Scenario Proposal.
+
+### Scenario Proposal (anchored to spine)
+
 Propose exactly 1 scenario: name, 2-sentence business story, core capability, why it addresses the #1 pain point, what exists vs what must be built, conflicts, whether LWC or Agentforce would strengthen the demo, assumptions, risks. Actively evaluate whether an Agentforce agent would strengthen the demo — if the scenario involves data retrieval, account intelligence, guided processes, or rep enablement, propose an agent and explain why.
+
+Tag each gated build category (Flow / Apex / LWC / Agentforce) in the proposal message with `Proves: KP[n]` referencing the spine above. Components without a clear KP cite — challenge in the proposal ("X doesn't obviously prove KP1/2/3 — does it earn its slot, or cut it?").
 
 **The scenario must be grounded in Stage 5 research.** Every data model choice should trace back to a doc finding or an audit star item. If you propose a custom object, show that no standard or industry object covers it — citing both the audit and the doc search.
 
@@ -207,17 +235,17 @@ Evaluate: genuine Salesforce strength? Achievable within build boundaries (see C
 
 Wait for the SE's answer. Evaluate BOTH halves:
 
-1. **Prioritization:** Produce a concrete reduced-scope version based on what they'd cut: "Here's what the demo looks like with those cuts: [reduced scenario summary]. Is this still a viable demo, or did we cut something load-bearing?" If the SE cannot articulate what to cut, that's a signal the scenario is either too thin or the SE hasn't internalised the customer's priorities — say so directly.
+1. **Prioritization:** Produce a concrete reduced-scope version based on what they'd cut: "Here's what the demo looks like with those cuts: [reduced scenario summary]. Is this still a viable demo, or did we cut something load-bearing?" Reference the spine: "Cuts should leave the residual message standing. If a cut breaks KP[n], that's the load-bearing one — keep it." If the SE cannot articulate what to cut, that's a signal the scenario is either too thin or the SE hasn't internalised the customer's priorities — say so directly.
 
 2. **Customer evidence:** If the SE's answer doesn't reference a specific customer statement or pain point, push back: "You answered what to cut, but which specific customer statement tells you the rest is essential?"
 
-Both halves must be resolved before proceeding to Stage 6b.
+Both halves must be resolved before proceeding to Stage 6b (data shape validation).
 
 ---
 
 ## Stage 6b: Data Shape Validation
 
-Read `.claude/prompts/sparring-data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 6c after — stopping for SE input only if problems require a design change.
+Read `.claude/prompts/sparring/data-shape.md` and execute the procedure. It validates that real data matches the scenario's design assumptions for every object Apex/Flow/Agentforce will query or write to. Proceed to Stage 6c after — stopping for SE input only if problems require a design change.
 
 ---
 
@@ -258,25 +286,9 @@ Populate the **Release Notes & Citations** section with every consultation from 
 
 ### Propose Lessons
 
-Before telling the SE the spec is ready, review the session for moments where:
-- The SE corrected a wrong assumption
-- An existing-first evaluation caught unnecessary new metadata
-- A gate question revealed a gap in reasoning
-- The audit surfaced something unexpected
-- A docs consultation contradicted or sharpened the scope
-
-If any occurred, propose 1-3 candidate lessons:
-
-> "Before we wrap up — I'd suggest adding these to our lessons file:
-> 1. [lesson]
-> 2. [lesson]
-> Want me to add these, edit them, or skip?"
-
-If the SE approves, read `.claude/prompts/lessons-maintenance.md` and follow the Append Format section to append each lesson to `orgs/sparring-lessons.md`, then follow the Trim & Share procedure in the same file if triggered. If nothing noteworthy, skip silently.
+Read `.claude/prompts/lessons-maintenance.md` and execute the "Propose Lessons (sparring)" section.
 
 ### Done
-
-**Do not send this until lessons are resolved (or skipped):**
 
 > "Spec saved.
 >

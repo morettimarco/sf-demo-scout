@@ -6,6 +6,7 @@ deployment-summary-*.md
 deployment-log.md
 ROADMAP.md
 setup-guide.md
+temp/
 
 # Salesforce-specific, per-org artefacts
 sfdx-project.json
@@ -16,6 +17,7 @@ force-app/
 .mcp.json
 layouts-audit/
 unpackaged/
+force-app/
 
 # macOS
 .DS_Store
@@ -40,6 +42,7 @@ temp-*
 manifest/
 tmp_*
 data/
+.cursor/
 
 # Editor
 .vscode/

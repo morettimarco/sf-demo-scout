@@ -91,6 +91,15 @@ else
   echo "✅ Salesforce CLI up to date."
 fi
 
+# --- 5b. Claude Code CLI (opportunistic self-update) ---
+echo ""
+echo "🔍 Updating Claude Code CLI..."
+if claude update >/dev/null 2>&1; then
+  echo "✅ Claude Code CLI up to date."
+else
+  echo "⚠️  claude update skipped or failed — continuing. (Re-run the Claude install canvas if needed.)"
+fi
+
 # --- 6. Pre-cache MCP server ---
 echo ""
 echo "📦 Pre-caching Salesforce MCP server..."
@@ -160,8 +169,19 @@ SYNC_SCRIPT="$REPO_DIR/.claude/scripts/sync-skills.sh"
 if [ -f "$SYNC_SCRIPT" ]; then
   # Invoke via `bash` so we don't depend on the exec bit being set yet —
   # the chmod step runs later in this script.
-  bash "$SYNC_SCRIPT" | grep -E '^(SYNCED|PRUNED|FAILED)=' | sed 's/^/  /' || true
-  echo "  ✅ Skill sync complete (see lines above for details)."
+  SYNC_LOG=$(mktemp)
+  if bash "$SYNC_SCRIPT" > "$SYNC_LOG" 2>&1; then
+    grep -E '^(SYNCED|PRUNED|FAILED)=' "$SYNC_LOG" | sed 's/^/  /' || true
+    echo "  ✅ Skill sync complete."
+  else
+    SYNC_EXIT=$?
+    grep -E '^(SYNCED|PRUNED|FAILED)=' "$SYNC_LOG" | sed 's/^/  /' || true
+    echo "  ❌ Skill sync failed (exit $SYNC_EXIT). Full log:"
+    sed 's/^/     /' "$SYNC_LOG"
+    rm -f "$SYNC_LOG"
+    exit 1
+  fi
+  rm -f "$SYNC_LOG"
 else
   echo "  ⚠️  Sync script not found at $SYNC_SCRIPT"
   echo "       Check your clone is complete, then re-run: bash install.sh"
@@ -285,13 +305,17 @@ fi
 # --- Done ---
 echo ""
 echo "================================"
-echo "✅ Install complete!"
+echo "✋ Initial setup complete! Launching Claude Code now to finish up."
+echo "This will take a moment, please do not close this Terminal window ..."
 echo ""
-echo "Next steps:"
-echo "  1. Open VS Code"
-echo "  2. File → Open Folder → select: ~/claude-projects/sf-demo-scout"
-echo "  3. Open the VS Code extension for Claude Code and start a new session"
-echo "  4. Then run /setup-demo-scout in the Claude Code extension to finish Scout setup"
-echo ""
-echo "/setup-demo-scout will finish up setup for you. ☕"
-echo ""
+
+# --- Auto-launch Claude Code with /setup-demo-scout ---
+# Skipped when chained from update.sh (update.sh needs to do cleanup first,
+# and launches claude itself). For standalone `bash install.sh` runs and for
+# bootstrap.sh (which doesn't set the flag), we auto-launch here so the SE
+# doesn't get stranded at a shell prompt wondering what to do next.
+if [ "${SF_SCOUT_CHAINED:-0}" != "1" ]; then
+  echo "🚀 Launching Claude Code with /setup-demo-scout..."
+  echo ""
+  exec claude "/setup-demo-scout"
+fi

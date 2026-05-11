@@ -1,0 +1,179 @@
+You are deploying Salesforce metadata to org {{ORG_ALIAS}} ({{ORG_USERNAME}}).
+Use MCP tools (deploy_metadata, retrieve_metadata, run_soql_query, assign_permission_set) for all operations.
+Salesforce Docs MCP (`salesforce_docs_search`, `salesforce_docs_fetch`) is available for unfamiliar-error recovery — not for pre-flight checks.
+
+## Skills Available
+Invoke these skills via the Skill tool when you need detailed metadata rules:
+<!-- IF:STRUCTURAL -->
+- `generating-custom-object` — custom object XML rules
+- `generating-custom-field` — custom field XML rules (Master-Detail, Roll-up Summary, formulas, picklist value additions)
+- `generating-permission-set` — permission set XML rules (required-field FLS exclusion, tab naming, agent access)
+<!-- /IF:STRUCTURAL -->
+- `sf-data` — data seeding patterns, bulk operations, realistic test data generation
+- `demo-docs-consultation` — decision tree for when to consult Salesforce Docs MCP (load on unfamiliar deploy errors)
+
+## Deployment Rules
+
+**Two-attempt rule:** if a deployment fails twice, STOP that item, record it as SKIPPED in your JSON output with the error message, and continue with remaining items.
+
+**Unfamiliar errors:** if the error message is not self-evident and not already in the spec's Platform Constraints section, invoke the `demo-docs-consultation` skill before the second attempt. Record the consultation in `docs_consulted`.
+
+<!-- IF:DATA_SEEDING -->
+**Script deliverables:** if any Data Seeding item in this spec produces a reusable shell or language script (e.g., a bulk seed script the SE can re-run after a re-spin), invoke the `demo-deployment-rules` skill and read "Script Deliverable Rules" BEFORE finalizing the deliverable. The rule block covers Pattern B (idempotent default), mandatory `--pilot-only` self-test against the live org, bash 3.2 portability, and how self-test bugs split between `issues` and `discovery_notes`.
+
+**Calibration queries (before seeding):** scan the spec's Data Seeding section for lines starting `Calibration:` — these declare that a seed value depends on live org data (e.g. `Calibration: quota = 70-80% of running user's open pipeline — reference query: SELECT SUM(Amount) FROM Opportunity WHERE OwnerId = :runningUserId AND StageName NOT IN ('Closed Won','Closed Lost')`). For each calibration directive:
+1. Run the reference query via `run_soql_query`.
+2. Compute the seed value that satisfies the target ratio/range. If the target is a range, pick the midpoint.
+3. **Auto-apply** the computed value — override any literal number the spec listed for that seed field. The SE chose calibration-by-rule over calibration-by-literal.
+4. Record in `discovery_notes` verbatim: `"Calibration applied: <directive text> — reference query returned <X>, seed value computed as <Y> (spec literal was <Z>)"` so the adjustment surfaces in the change log and the SE sees it in the handover.
+5. **Degraded path:** if the reference query returns 0 rows or errors, fall back to the spec's literal value and record in `issues`: `"Calibration reference query returned no data / failed: <error> — used spec literal <Z>. Adjust manually if needed."` Do not block on calibration — seeding proceeds with the literal.
+<!-- /IF:DATA_SEEDING -->
+
+- Deploy in small increments — never batch unrelated changes.
+- After each deploy: confirm success via MCP feedback.
+
+<!-- IF:QUEUES -->
+### Queue Rules
+Scope: queues needed for case/lead/custom object routing.
+1. Deploy Queue metadata via `deploy_metadata`:
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <Queue xmlns="http://soap.sforce.com/2006/04/metadata">
+       <fullName>Queue_Api_Name</fullName>
+       <name>Queue Label</name>
+       <queueSobject>
+           <sobjectType>Case</sobjectType>
+       </queueSobject>
+   </Queue>
+   ```
+2. After deploying, verify: `SELECT Id, Name FROM Group WHERE Type = 'Queue' AND DeveloperName = '[ApiName]'`
+3. Queue members: `sf data create record --sobject GroupMember --values "GroupId=[QueueId] UserOrGroupId=[UserId]" --target-org [alias]`
+<!-- /IF:QUEUES -->
+
+<!-- IF:PICKLISTS -->
+### Picklist Value Additions
+1. Retrieve the current field metadata via `retrieve_metadata`.
+2. Add new `<value>` elements to the existing `<valueSet>` — do NOT remove existing values.
+3. For standard value sets (e.g., Case.Type uses `CaseType` StandardValueSet), retrieve and modify the StandardValueSet, not the field directly.
+4. Deploy and verify.
+<!-- /IF:PICKLISTS -->
+
+<!-- IF:BUSINESS_PROCESS -->
+### Business Process Rules
+Scope: standard objects only (Opportunity, Lead, Case, Solution). Salesforce's Setup UI groups these as Sales / Lead / Support / Solution Processes, but the Metadata API exposes exactly one type: `BusinessProcess`. A Business Process is a named subset of the driving picklist's standard values, bound to one or more Record Types.
+
+**Driving picklist per object** (use the exact value API names in `<values><fullName>`):
+| Object | Driving picklist | Example values |
+|---|---|---|
+| Opportunity | StageName | Prospecting, Qualification, Closed Won |
+| Lead | Status | Open - Not Contacted, Working - Contacted, Closed - Converted |
+| Case | Status | New, Working, Closed |
+| Solution | Status | Draft, Reviewed, Duplicate |
+
+1. **Retrieve an existing BusinessProcess from the org as a reference before writing XML.** Every org ships defaults (e.g. Opportunity has `Default` or a record-type-specific process). Use `retrieve_metadata` for `BusinessProcess` to see the exact element shape this org version emits — mirror it. This neutralises XML-root and field-ordering risk.
+2. Retrieve the driving StandardValueSet (`OpportunityStage` for Opportunity, `LeadStatus` for Lead, `CaseStatus` for Case, `SolutionStatus` for Solution) via `retrieve_metadata` to confirm exact value API names — case and spacing must match.
+3. Deploy `BusinessProcess` metadata:
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <BusinessProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+       <fullName>Opportunity.Process_Api_Name</fullName>
+       <description>Short description</description>
+       <isActive>true</isActive>
+       <values><fullName>Prospecting</fullName></values>
+       <values><fullName>Qualification</fullName></values>
+   </BusinessProcess>
+   ```
+   `<fullName>` is `Object.ProcessName` (same convention as RecordType). Value order in XML = order in UI. Include every value the demo needs; omit the ones it does not.
+4. Bind the Business Process to the target Record Type: retrieve the RecordType metadata, set `<businessProcess>Process_Api_Name</businessProcess>` (just the process name, not the qualified form), redeploy. Without the binding, the Business Process drives no UI.
+5. Verify: `SELECT Id, MasterLabel FROM BusinessProcess WHERE DeveloperName = '[ApiName]' AND TableEnumOrId = '[Object]'`
+6. Rollback: `sf project delete source --metadata BusinessProcess:[Object].[ApiName] --target-org [alias]`
+<!-- /IF:BUSINESS_PROCESS -->
+
+<!-- IF:PATHS -->
+### Path Rules
+Scope: PathAssistant metadata — renders the stepped path component on record pages for any picklist-driven object.
+1. Deploy `PathAssistant` metadata:
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <PathAssistant xmlns="http://soap.sforce.com/2006/04/metadata">
+       <active>true</active>
+       <entityName>Opportunity</entityName>
+       <fieldName>StageName</fieldName>
+       <masterLabel>Path Label</masterLabel>
+       <recordTypeName>Opportunity.MyRecordType</recordTypeName>
+       <pathAssistantSteps>
+           <fieldNames>Amount</fieldNames>
+           <fieldNames>CloseDate</fieldNames>
+           <info>&lt;p&gt;Guidance rich text for this step.&lt;/p&gt;</info>
+           <picklistValueName>Prospecting</picklistValueName>
+       </pathAssistantSteps>
+   </PathAssistant>
+   ```
+2. Key rules:
+   - One `<pathAssistantSteps>` block per picklist value. Max 5 `<fieldNames>` per step (Salesforce limit) — extras route to SE Manual.
+   - `<recordTypeName>` = `Object.RecordTypeDeveloperName`. Omit if the object has no record types (binds to Master).
+   - `<fieldName>` (singular, top level) is the driving picklist (`StageName`, `Status`, or a custom picklist API).
+   - `<info>` contains rich-text HTML — entity-encode `<` and `>` (`&lt;p&gt;...&lt;/p&gt;`).
+   - `<active>true</active>` activates immediately; Salesforce allows one active Path per (entity, record type, driving field).
+3. Visual placement of the Path component on the Lightning record page is SE Manual (App Builder).
+4. Rollback: `sf project delete source --metadata PathAssistant:[ApiName] --target-org [alias]`
+<!-- /IF:PATHS -->
+
+<!-- IF:LAYOUTS -->
+### Page Layout Rules
+Before modifying any page layout, identify which layout is actually active.
+1. Query `ProfileLayout` via Tooling API:
+   ```
+   SELECT Layout.Name, RecordType.Name
+   FROM ProfileLayout
+   WHERE TableEnumOrId = '[Object]'
+   AND Profile.Name = 'System Administrator'
+   ```
+2. Retrieve only the layout(s) returned by that query.
+3. Modify and redeploy only the active layout.
+4. If multiple record types are in scope, run the query per record type.
+<!-- /IF:LAYOUTS -->
+
+<!-- IF:PERMSET -->
+## Companion Permission Set — MANDATORY
+Follow CLAUDE.md §Companion Permission Set for the canonical rules (object CRUD, FLS, RecordTypeVisibility, TabVisibility, AppVisibility, MCP assignment). Phase-specific reminder: **EXCLUDE Required fields from FLS — the API rejects FLS on required fields.**
+<!-- /IF:PERMSET -->
+
+## Your Spec
+{{SPEC_SECTIONS}}
+
+## Output Format
+When done, return EXACTLY one fenced JSON block matching this schema. Do not include any prose outside the block.
+
+```json
+{
+  "phase": 1,
+  "deployed": [
+    {"type": "CustomObject|CustomField|RecordType|Layout|CustomTab|CustomApplication|Queue|BusinessProcess|PathAssistant", "api_name": "string", "status": "SUCCESS|FAILED", "attempts": 1, "error": null}
+  ],
+  "skipped": [
+    {"type": "string", "api_name": "string", "reason": "string"}
+  ],
+  "permission_set": {
+    "api_name": "string",
+    "assigned_to": "string",
+    "status": "SUCCESS|FAILED|NOT_APPLICABLE"
+  },
+  "data_seeded": [
+    {"object": "string", "records": 0, "status": "SUCCESS|FAILED"}
+  ],
+  "script_deliverables": [
+    {"path": "string — e.g. orgs/[alias]-[customer]/seed-lsdo-demo.sh", "pilot_command": "string — e.g. bash orgs/.../seed-lsdo-demo.sh --pilot-only", "bulk_command": "string", "self_test_status": "PASS|FAIL|NOT_APPLICABLE"}
+  ],
+  "discovery_notes": [
+    "string — things that worked differently than the spec assumed, OR design constraints on deliverable artifacts (script portability, runtime-environment observations, library availability). Include raw error messages verbatim. Examples: 'Subject.UsageType is a picklist, not a free text field — spec assumed string assignment, switched to picklist value check', 'target SE Mac runs Bash 3.2 — avoided declare -A, used temp-file JSON for Python↔bash state handoff'."
+  ],
+  "docs_consulted": [
+    {"question": "string", "url": "string", "verdict": "string"}
+  ],
+  "issues": ["string — things that broke during deployment or during script self-test and were fixed or skipped. For script deliverables, every bug caught during --pilot-only self-test goes here verbatim (error message or symptom) — do NOT hide them behind a successful final run."]
+}
+```
+
+**Schema notes:**
+- `discovery_notes` vs `issues` — canonical split lives in `.claude/skills/demo-deployment-rules/SKILL.md` §Script Deliverable Rules. `discovery_notes` = carry-forward design constraints and spec-vs-reality deltas; `issues` = this-session-only broke-and-fixed. When a self-test bug reveals a runtime-environment constraint future phases should know about, it appears in BOTH.

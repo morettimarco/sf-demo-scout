@@ -15,9 +15,16 @@ Org Audit Used: audit-[YYYY-MM-DD]-[HHmm].md
 - **Company:**
 - **Industry vertical:**
 - **Key pain point:**
-- **Value theme:**
 - **Demo stakeholders:**
 - **Competitive context:**
+
+### Value Spine
+Drafted in Stage 6a, refined with SE. The narrative the build proves against. Empty slots are honest gaps — leaving them visible is intentional, not an error.
+- **Residual Message:** [one sentence — the one thing the room remembers]
+- **Audience:** [who carries this message away — altitude-setter]
+- **KP1 — Pain:** [what's broken today, ideally a direct customer quote]
+- **KP2 — Cost of Inaction:** [what staying with the status quo costs — metric if available, or "gap — SE to fill"]
+- **KP3 — Future State:** [the concrete outcome with visible contrast to KP1]
 
 ## Release Notes & Citations
 Docs consulted during sparring (Platform & Data Model Research — Stage 5, plus any residual checks in Stage 7). Empty if scenario uses only established patterns.
@@ -61,6 +68,7 @@ Context only — Slack content is medium-confidence and attributed to source mes
 - FLS: Read + Edit (EXCLUDE Required fields)
 - RecordTypeVisibility: visible=true, TabVisibility: Visible (not DefaultOn — DefaultOn is Profile-only), AppVisibility: visible=true
 - Assign to running user
+- **If this spec has an Agentforce section:** Phase 3 auto-detects and assigns the standard Agentforce runtime permset (`AgentforceEmployeeAgentUser` / `AgentforceServiceAgentUser` / `AgentforceUser`, whichever exists in the org) to the running user. Do NOT list those permsets in the Companion permset above — they are standard permsets, assigned separately by Phase 3.
 
 ### Platform Constraints (from pre-flight — if any managed/industry objects in scope)
 - [Object]: IsEverCreatable=[true/false], IsQueryable=[true/false], queueable=[yes/no], namespace=[if managed]
@@ -100,11 +108,17 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 - **Record counts must be single integers, not ranges.** `Records: 5` — not `Records: 3-5`. Building needs a deterministic count; if genuinely unsure, pick the upper bound of what the demo story needs.
 - **Cross-object seeding (junctions, FK chains):** if this seed touches 2+ objects with lookup population, building will produce an idempotent reusable script per `demo-deployment-rules` §Script Deliverable Rules. Spec lists target objects and key field mappings; the script path + `--pilot-only` + bulk commands land in the change log and handover brief.
 - **Field names are describe-confirmed.** Sparring Stage 6b runs `sf sobject describe` on every Data Seeding target object before writing this spec. Field names, RecordType DeveloperNames, and picklist-vs-string distinctions in this section are empirically verified, not inferred.
+- **Calibration directives (when seed values depend on live org data):** if a seed value must be computed against live aggregates (e.g. "quota set to 70-80% of running user's open pipeline" so the "at risk" narrative reads), write it as a `Calibration:` line under the relevant seed bullet. Format: `Calibration: <target ratio/range in plain English> — reference query: <one-line SOQL>`. Phase 1 runs the query, computes the seed value, and auto-applies — overriding any literal number in this section. The calibration and the computed value land in the change log. If the reference query errors or returns no data, Phase 1 falls back to the literal and records the fallback in `issues`.
 
-### Page Layouts
+### Page Layouts (Classic — field additions only)
+Scope: adding fields to a classic Page Layout that's still the active layout for the object/RecordType. Field positioning within the layout is SE Manual (App Builder / Page Layout editor); Scout deploys the field-presence change only.
 - [Object] — [RecordType] — Active layout: [layout name from audit ★]
 - Fields to add: [list]
 - ⚠️ Visual arrangement: SE Manual Checklist
+
+### Lightning Record Pages (SE Manual — App Builder)
+Scout cannot deploy component placement on Lightning record pages; this section is reference for your App Builder work — list components the SE should add, with the page they belong on. Scout deploys the underlying metadata (LWC bundles, Path component metadata, QuickActions); the SE drags and drops in App Builder.
+- [Object] — [Page name] — Components to add: [list]
 
 ### Lightning App / Tabs
 - Existing app: [name] — modifications: [list]
@@ -112,12 +126,21 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 
 ### Flows (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this flow makes a KP land in the demo]
 - Plain English: [description]
-- Flow name: [ApiName], Type: Record-Triggered
-- Object: [single], Trigger: [when], Logic: [steps]
+- Flow name: [ApiName]
+- Flow type: one of **record-triggered** (before-save / after-save / before-delete) | **autolaunched** | **subflow** | **scheduled** | **platform-event-triggered**
+  - Orchestration and complex screen flows route to the SE Manual Checklist — do not list them here.
+- Type-specific fields:
+  - **Record-triggered:** Trigger object: [API name], Trigger type: [before-save | after-save | before-delete], Entry conditions: [filter formula or "none"], Logic: [steps, including any cross-object DML]
+  - **Autolaunched:** Invoked from: [Apex class / parent flow / REST / process], Input variables: [name + type per var], Logic: [steps]
+  - **Subflow:** Parent flow: [ApiName of caller — must also be in this spec or already in org], Input variables: [name + type per var], Output variables (if any): [name + type per var], Logic: [steps]
+  - **Scheduled:** Start date: [YYYY-MM-DD], Start time: [HH:MM:SS], Frequency: [Once | Daily | Weekly | Monthly | Yearly | Hourly | Weekdays], Object filter (optional): [SObject + filter conditions for batch runs], Logic: [steps]
+  - **Platform-event-triggered:** Event object: [API name — e.g. `OrderCreated__e` or standard like `AIPredictionEvent`], Event fields referenced: [list], Logic: [steps]
 
 ### Screen Flows (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this screen flow makes a KP land in the demo]
 - Plain English: [what the user sees and accomplishes]
 - Flow name: [ApiName], Type: Screen Flow
 - Screen count: [1-3 default; if 4-5, add SE justification sentence below]
@@ -134,20 +157,24 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
   - If Get: queriedFields: [explicit list — never storeOutputAutomatically]
 - QuickAction wiring: [yes (label: [button label], layout: [active layout name from audit]) | no — SE will wire manually]
 - Smoke test: Scout auto-generates happy-path FlowTest; SE does a one-time visual walkthrough in the Lightning UI
+- Components outside the autonomous whitelist (Repeater, Data Table, Kanban Board, File Upload/Preview, custom LWC screen component, reactive-across-screens with formula deps, branching across screens) → move to SE Manual Checklist.
 
 ### Apex (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this Apex makes a KP land in the demo]
 - Plain English: [description]
 - Name: [name], Object: [single], Logic: [steps]
 
 ### LWC Components (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
+- **Proves:** KP[1|2|3] — [one line: how this LWC makes a KP land in the demo]
 - Plain English: [behaviour]
 - Name: [name], Location: [page], Data: [objects/fields], SLDS: [pattern]
 
 ### Agentforce (if applicable)
 - ⚠️ SE CONFIRMATION REQUIRED (single upfront gate — Scout will notify you)
 - ⚠️ Deploys last — ADLC skills are large; org config completes first
+- **Proves:** KP[1|2|3] — [one line: how this agent makes a KP land in the demo]
 - Path: New Agent / Modify Existing Agent (specify which)
 - Plain English: [what agent does, why it strengthens demo]
 - Agent: [name], Type: AgentforceEmployeeAgent / AgentforceServiceAgent
@@ -170,8 +197,9 @@ One `BusinessProcess` Metadata API type covers Sales / Lead / Support / Solution
 - [ ] Multi-agent orchestration (if applicable)
 
 ### Must Do Before Demo
-- [ ] Build complex flows (scheduled, multi-object, subflows, screen flows outside autonomous whitelist)
+- [ ] Build orchestration flows and complex screen flows (components outside autonomous whitelist, branching across screens, reactive-across-screens with formula deps, LWC screen components)
 - [ ] Screen-flow visual QA: walk through each autonomous screen flow once in the Lightning UI (labels, button order, help text read sensibly)
+- [ ] For scheduled flows: verify the Scheduled Jobs page (Setup → Scheduled Jobs) shows the next run time matching the spec
 - [ ] Complete Agentforce manual steps (channel assignment, production testing)
 - [ ] Arrange field positions and sections in App Builder
 - [ ] Place LWC on Lightning pages

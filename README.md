@@ -19,25 +19,24 @@ SF Demo Scout is a Claude Code pipeline that *spars* with you about customer sce
 ## Install (One Time, We Promise)
 
 ```bash
-git clone https://github.com/seb-schi/sf-demo-scout ~/claude-projects/sf-demo-scout
-cd ~/claude-projects/sf-demo-scout && bash install.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/seb-schi/sf-demo-scout/main/bootstrap.sh)"
 ```
 
-Go grab a coffee. ☕ The script installs Homebrew, Node.js, Python, Salesforce CLI, sets up the SFDX project, registers the Slack MCP server, and pulls 16 community skills from three open-source repos. It's idempotent – safe to re-run if something went sideways the first time.
+One command. Go grab a coffee. ☕ Bootstrap clones the repo to `~/claude-projects/sf-demo-scout`, runs the full installer (Homebrew, Node.js, Python, Salesforce CLI, Slack MCP registration, 16 community skills, CLI self-updates), and drops you straight into a Claude Code session running `/setup-demo-scout`. Idempotent — safe to re-run. If the repo already exists, bootstrap routes to `update.sh` instead.
 
-Then: **VS Code → Open Folder → `~/claude-projects/sf-demo-scout` → Open Terminal → `claude` → `/setup-demo-scout`**
+Prerequisites: `git` (via `xcode-select --install`) and Claude Code (via the *Installing Claude Code for Solutions* canvas — one Google sign-in). Bootstrap tells you if either is missing.
 
 That's it. You're in.
 
 ## Updating
 
 ```bash
-bash update.sh
+bash ~/claude-projects/sf-demo-scout/update.sh
 ```
 
-No `git pull` drama here. Scout nukes the install, re-clones fresh, and restores your org data (audits, specs, change logs). Clean slate. Zero drift. ~30 seconds. Like a metadata refresh, but for your tooling.
+Or just re-run the bootstrap one-liner — it routes to `update.sh` automatically when the repo already exists. Scout nukes the install, re-clones fresh, restores your org data (audits, specs, change logs), and lands you back inside a Claude Code session running `/setup-demo-scout`. Clean slate. Zero drift. ~30 seconds.
 
-> 💡 Running from VS Code? It'll pop open Terminal.app for you. Close VS Code, let it cook, reopen after.
+> 💡 Prefer VS Code? `update.sh` pops open Terminal.app for you if you run it from VS Code's integrated terminal. Close VS Code, let it cook, reopen after.
 
 ---
 

@@ -40,14 +40,7 @@ Run a single MCP probe to confirm connectivity:
 
 ## Step 2: Model Gate
 
-Output as a standalone message:
-
-> "⚠️ **This command is designed for Opus.**
-> Run `/model opus` now if you haven't already — your conversation history is preserved.
->
-> Confirm you're on Opus before we continue. (yes)"
-
-**Wait for the SE's confirmation before proceeding.**
+Read `.claude/prompts/model-gate-opus.md` and emit the gate. Wait for the SE's confirmation before proceeding.
 
 ---
 
@@ -125,13 +118,13 @@ If only Phase 1 applies:
 
 ### Sub-Agent Output Validation
 
-After EVERY sub-agent returns, load `.claude/prompts/sub-agent-validation.md` and run the validation procedure before proceeding. The procedure covers JSON parse checks, per-phase required-keys lists, empirical org-probe queries for schema-drift-with-successful-deployment, and the retry-or-skip gate when the org confirms an incomplete deployment.
+After EVERY sub-agent returns, load `.claude/prompts/building/sub-agent-validation.md` and run the validation procedure before proceeding. The procedure covers JSON parse checks, per-phase required-keys lists, empirical org-probe queries for schema-drift-with-successful-deployment, and the retry-or-skip gate when the org confirms an incomplete deployment.
 
 ### Phase Prep Procedure
 
 Every phase follows the same prep flow. Per-phase inputs are in the table below.
 
-1. Read the template file from `.claude/prompts/`.
+1. Read the template file from `.claude/prompts/building/`.
 2. If the template has `<!-- IF:... -->` markers, strip blocks whose tag has no matching content in the spec (marker comments included).
 3. Replace every `{{PLACEHOLDER}}` with the content listed in the phase's row below. Do not inject skill file contents — sub-agents invoke skills by name via the Skill tool.
 4. Spawn: `Agent(description="[row's description]", model="sonnet", prompt=[constructed prompt])`.
@@ -139,9 +132,9 @@ Every phase follows the same prep flow. Per-phase inputs are in the table below.
 
 | Phase | Template | IF markers | Placeholders | Agent description |
 |-------|----------|------------|--------------|-------------------|
-| 1 | `.claude/prompts/phase1.md` | `QUEUES`, `LAYOUTS`, `PERMSET`, `STRUCTURAL`, `PICKLISTS`, `DATA_SEEDING`, `BUSINESS_PROCESS`, `PATHS` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{SPEC_SECTIONS}}` (Objects & Fields, Record Types, Permission Set, Data Seeding, Page Layouts, Lightning App / Tabs, Business Processes, Paths) | `Phase 1: Org Config deployment` |
-| 2 | `.claude/prompts/phase2.md` | `FLOWS`, `APEX`, `LWC` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PHASE1_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Flows, Apex, LWC sections) | `Phase 2: Flows/Apex/LWC deployment` |
-| 3 | `.claude/prompts/phase3.md` | *(none)* | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PRIOR_PHASES_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Agentforce section) | `Phase 3: Agentforce deployment` |
+| 1 | `.claude/prompts/building/phase1.md` | `QUEUES`, `LAYOUTS`, `PERMSET`, `STRUCTURAL`, `PICKLISTS`, `DATA_SEEDING`, `BUSINESS_PROCESS`, `PATHS` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{SPEC_SECTIONS}}` (Objects & Fields, Record Types, Permission Set, Data Seeding, Page Layouts, Lightning App / Tabs, Business Processes, Paths) | `Phase 1: Org Config deployment` |
+| 2 | `.claude/prompts/building/phase2.md` | `FLOWS`, `APEX`, `LWC` | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PHASE1_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Flows, Apex, LWC sections) | `Phase 2: Flows/Apex/LWC deployment` |
+| 3 | `.claude/prompts/building/phase3.md` | *(none)* | `{{ORG_ALIAS}}`, `{{ORG_USERNAME}}`, `{{PRIOR_PHASES_SUMMARY}}`, `{{SPEC_SECTIONS}}` (Agentforce section) | `Phase 3: Agentforce deployment` |
 
 ### Phase 1: Org Config
 
@@ -184,7 +177,7 @@ If no, record as skipped. If yes, run the Phase Prep Procedure for Phase 3. Afte
 
 ## Step 7b: Post-Deployment Execution Order Check
 
-Read `.claude/prompts/post-deployment-check.md` and execute the procedure. Flag findings in the change log.
+Read `.claude/prompts/building/post-deployment-check.md` and execute the procedure. Flag findings in the change log.
 
 ---
 
@@ -193,7 +186,7 @@ Read `.claude/prompts/post-deployment-check.md` and execute the procedure. Flag 
 ### 8a: Write Change Log
 
 Consolidate results from all phases into a single change log.
-Use the template in `.claude/prompts/change-log-template.md` (read it when writing the log).
+Use the template in `.claude/prompts/building/change-log-template.md` (read it when writing the log).
 
 The change log must include:
 - Everything from all sub-agent reports (deployed, skipped, permission set, data, issues)
@@ -204,29 +197,13 @@ The change log must include:
 
 ### 8b: Propose Lessons
 
-Review the session for:
-- Two-attempt failures reported by sub-agents (what failed and why)
-- Sub-agent output validation failures — especially schema-drift-with-successful-deployment (the sub-agent emitted the wrong envelope but the org probe passed). Candidate lesson: the drift vector itself (what the sub-agent emitted vs what the schema required), so the next author can tighten the prompt.
-- Unexpected conflict check findings from Step 6
-- SE corrections during gated confirmations
-- Permission set or layout issues reported by sub-agents
-- Phase 2 AND Phase 3 `discovery_notes` entries — if any describe a new platform restriction, validate/publish/activate-time workaround, or standard-action-to-Apex fallback, propose adding it to `orgs/building-lessons.md` with the exact error message or symptom as a diagnostic pattern. Phase 3 publish-time fixes (nested-if syntax, license-restricted permissions, CLI prefix requirements) are high-value lessons — they recur across every Agentforce deployment.
-- `actions_unverified_in_preview` entries — if a new category appears (e.g. a new stateless-preview gap not seen before), propose a lesson so future Phase 3 prompts can pre-emptively warn.
-
-If any occurred, propose 1-3 candidate lessons:
-
-> "A few things worth remembering for next time:
-> 1. [lesson]
-> 2. [lesson]
-> Add these to lessons? (yes / edit / skip)"
-
-If approved, read `.claude/prompts/lessons-maintenance.md` and follow the Append Format section to append each lesson to `orgs/building-lessons.md`, then follow the Trim & Share procedure in the same file if triggered. If the deployment was clean, skip silently.
+Read `.claude/prompts/lessons-maintenance.md` and execute the "Propose Lessons (building)" section.
 
 ### 8c: Demo Handover Brief
 
 **Do NOT output the brief until 8a and 8b are complete.**
 
-Read `.claude/prompts/demo-handover-brief.md` for the format, then synthesize the brief. Output it to the terminal as plain text (no file written).
+Read `.claude/prompts/building/handover-brief.md` for the format, then synthesize the brief. Output it to the terminal as plain text (no file written).
 
 **Then offer the Slack handover canvas:**
 

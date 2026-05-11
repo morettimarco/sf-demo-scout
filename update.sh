@@ -3,7 +3,7 @@
 # Preserves org data (audits, specs, change logs) and org config.
 # Safe to run from inside or outside the project directory.
 
-set -e
+set -eo pipefail
 
 REPO_NAME="sf-demo-scout"
 PROJECTS_DIR="$HOME/claude-projects"
@@ -75,6 +75,32 @@ else
   echo "   ℹ️  No .sf/config.json found"
 fi
 
+# --- Failure safety net: if anything below this point fails, tell the SE where their data is ---
+on_error() {
+  echo ""
+  echo "================================"
+  echo "⚠️  Update failed mid-way."
+  echo "================================"
+  echo ""
+  echo "Your org data is SAFE at:"
+  echo "   $BACKUP_DIR/orgs/"
+  echo ""
+  echo "To recover manually:"
+  echo ""
+  echo "   rm -rf $REPO_DIR && git clone $REPO_URL $REPO_DIR"
+  if [ -d "$BACKUP_DIR/orgs" ]; then
+    echo "   cp -R $BACKUP_DIR/orgs $REPO_DIR/orgs"
+  fi
+  if [ -f "$BACKUP_DIR/.sf/config.json" ]; then
+    echo "   mkdir -p $REPO_DIR/.sf && cp $BACKUP_DIR/.sf/config.json $REPO_DIR/.sf/config.json"
+  fi
+  echo "   cd $REPO_DIR && bash install.sh"
+  echo ""
+  echo "The backup at $BACKUP_DIR will NOT be auto-deleted — it stays until you manually remove it or re-run update.sh successfully."
+  echo ""
+}
+trap on_error ERR
+
 # --- 3. Delete ---
 echo ""
 echo "🗑️  Removing old installation..."
@@ -103,10 +129,42 @@ if [ -f "$BACKUP_DIR/.sf/config.json" ]; then
 fi
 
 # --- 6. Run install ---
+# SF_SCOUT_CHAINED=1 tells install.sh NOT to exec claude at its tail — we
+# need control back here to run the cleanup step before launching claude
+# ourselves.
+# install.sh exit 2 = partial skill-sync failure (repo is fine, just missing
+# some external skills). Don't trigger the nuclear ERR trap for that — repo
+# is already re-cloned and org data restored; the SE just needs to retry sync.
 echo ""
 echo "⚙️  Running install.sh..."
 cd "$REPO_DIR"
-bash install.sh
+set +e
+SF_SCOUT_CHAINED=1 bash install.sh
+INSTALL_EXIT=$?
+set -e
+
+if [ $INSTALL_EXIT -eq 2 ]; then
+  trap - ERR
+  rm -rf "$BACKUP_DIR"
+  rm -f "$TMP_SCRIPT"
+  echo ""
+  echo "================================"
+  echo "⚠️  Update completed with skill-sync warnings"
+  echo "================================"
+  echo ""
+  echo "The repo updated successfully and your org data was restored,"
+  echo "but one or more external skills failed to sync."
+  echo ""
+  echo "Retry the sync with:"
+  echo ""
+  echo "   bash $REPO_DIR/.claude/scripts/sync-skills.sh"
+  echo ""
+  echo "If that still fails, paste the output in #sf-demo-scout."
+  echo ""
+  exit 0
+elif [ $INSTALL_EXIT -ne 0 ]; then
+  false
+fi
 
 # --- 7. Cleanup ---
 rm -rf "$BACKUP_DIR"
@@ -116,10 +174,7 @@ echo ""
 echo "================================"
 echo "✅ Update complete!"
 echo ""
-echo "Next:"
-echo "  1. Open VS Code → File → Open Folder → $REPO_DIR"
-echo "  2. Start Claude Code"
-echo "  3. Run /setup-demo-scout in Claude Code to finish config"
+echo "🚀 Launching Claude Code with /setup-demo-scout..."
 echo ""
-echo "Step 3 is required — it re-verifies your demo org connection and Slack auth after the reinstall."
-echo ""
+cd "$REPO_DIR"
+exec claude "/setup-demo-scout"

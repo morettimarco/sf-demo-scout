@@ -1,12 +1,10 @@
 {
-  "env": {
-    "CLAUDE_CODE_EXTRA_BODY": "{\"thinking\":{\"type\":\"adaptive\",\"display\":\"summarized\"}}"
-  },
   "permissions": {
     "allow": [
       "mcp__Salesforce_DX__*",
       "mcp__Salesforce_Docs__*",
       "mcp__slack__*",
+      "mcp__plugin_slack_*",
       "Bash",
       "Edit",
       "Write",

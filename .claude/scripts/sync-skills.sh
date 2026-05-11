@@ -108,15 +108,27 @@ while IFS='|' read -r NAME SRC_NAME SKILL_PATH SRC_TYPE SRC_URL EXTRA MODE; do
     fi
   elif [ "$SRC_TYPE" = "clone" ]; then
     CLONE_DIR="$TMP_DIR/$SRC_NAME"
-    # Clone once per source per run
+    # Clone once per source per run.
+    # Try incremental fetch first (fast path); on any failure, nuke the cache
+    # and re-clone. Shallow /tmp clones can rot when upstream rewrites history
+    # or when a prior run was interrupted mid-fetch, and macOS no longer
+    # clears /tmp on reboot — without this fallback, stale state is sticky.
     if [[ ! " ${CLONED_SOURCES[*]:-} " =~ " $SRC_NAME " ]]; then
+      CLONE_OK=0
       if [ -d "$CLONE_DIR/.git" ]; then
-        (cd "$CLONE_DIR" && git fetch --quiet --depth 1 origin "$EXTRA" && git reset --hard --quiet "origin/$EXTRA") \
-          || { FAILED+=("$NAME (git fetch failed for $SRC_NAME)"); continue; }
-      else
+        if (cd "$CLONE_DIR" && git fetch --quiet --depth 1 origin "$EXTRA" && git reset --hard --quiet "origin/$EXTRA"); then
+          CLONE_OK=1
+        fi
+      fi
+      if [ $CLONE_OK -eq 0 ]; then
         rm -rf "$CLONE_DIR"
-        git clone --depth 1 --branch "$EXTRA" --quiet "$SRC_URL" "$CLONE_DIR" \
-          || { FAILED+=("$NAME (git clone failed for $SRC_NAME)"); continue; }
+        if git clone --depth 1 --branch "$EXTRA" --quiet "$SRC_URL" "$CLONE_DIR"; then
+          CLONE_OK=1
+        fi
+      fi
+      if [ $CLONE_OK -eq 0 ]; then
+        FAILED+=("$NAME (git clone failed for $SRC_NAME)")
+        continue
       fi
       CLONED_SOURCES+=("$SRC_NAME")
     fi
